@@ -119,8 +119,15 @@ function useSpeechRecognition() {
   }, []);
 
   const clearError = useCallback(() => setError(null), []);
+  const reset = useCallback(() => {
+    setTranscript('');
+    setError(null);
+    setIsListening(false);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (recognitionRef.current) try { recognitionRef.current.stop(); } catch {}
+  }, []);
 
-  return { isListening, transcript, error, startListening, stopListening, clearError };
+  return { isListening, transcript, error, startListening, stopListening, clearError, reset };
 }
 
 // Compare strings with fuzzy matching
@@ -156,7 +163,7 @@ function comparePronunciation(original: string, spoken: string): { score: number
 export default function Pronunciation() {
   const addXP = useGameStore(s => s.addXP);
   const addGems = useGameStore(s => s.addGems);
-  const { isListening, transcript, error, startListening, stopListening, clearError } = useSpeechRecognition();
+  const { isListening, transcript, error, startListening, stopListening, clearError, reset } = useSpeechRecognition();
   const { isRecording, audioUrl, startRecording, stopRecording, clear: clearAudio } = useAudioRecorder();
   const { speak } = useTTS();
 
@@ -191,6 +198,7 @@ export default function Pronunciation() {
     setPlayed(false);
     clearError();
     clearAudio();
+    reset();
   }, [currentIndex]);
 
   const handleRecord = () => {

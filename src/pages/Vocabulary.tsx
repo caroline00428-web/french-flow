@@ -221,6 +221,9 @@ export default function Vocabulary() {
   const handleNext = () => {
     if (currentIndex < words.length - 1) {
       setCurrentIndex(i => i + 1);
+      setIsFlipped(false);
+      setShowResult(false);
+      setRating(null);
     } else {
       setSessionComplete(true);
       if (sessionCorrect === words.length && words.length > 5) {
