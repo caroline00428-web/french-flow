@@ -18,6 +18,7 @@ import Grammar from './pages/Grammar';
 import Story from './pages/Story';
 import Reading from './pages/Reading';
 import ScriptsPage from './pages/ScriptsPage';
+import PhonicsPage from './pages/PhonicsPage';
 import Tutor from './pages/Tutor';
 import Achievements from './pages/Achievements';
 import Settings from './pages/Settings';
@@ -60,6 +61,7 @@ export default function App() {
           <Route path="/story" element={<Story />} />
           <Route path="/reading" element={<Reading />} />
           <Route path="/scripts" element={<ScriptsPage />} />
+          <Route path="/phonics" element={<PhonicsPage />} />
           <Route path="/tutor" element={<Tutor />} />
           <Route path="/achievements" element={<Achievements />} />
           <Route path="/settings" element={<Settings />} />
