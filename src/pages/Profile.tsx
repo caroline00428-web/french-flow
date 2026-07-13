@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '../store/useGameStore';
 import { hasApiKey } from '../services/gemini';
-import { Zap, BookOpen, Settings, Trophy, Star, TrendingUp, Mic } from 'lucide-react';
+import { BookOpen, Settings, Star, TrendingUp, Mic } from 'lucide-react';
 
 export default function Profile() {
   const navigate = useNavigate();
