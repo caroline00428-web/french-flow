@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useGameStore } from '../store/useGameStore';
 import { Target, Download, Trash2, Info, Key, Check, Eye, EyeOff, ExternalLink, Volume2 } from 'lucide-react';
 import { hasApiKey, setApiKey, clearApiKey, testApiKey, getProvider } from '../services/gemini';
-import { getFrenchVoices, getSavedVoiceName, saveVoiceName } from '../hooks/useTTS';
+import { getSavedVoiceName, saveVoiceName } from '../hooks/useTTS';
 
 export default function Settings() {
   const progress = useGameStore(s => s.progress);
@@ -16,6 +16,18 @@ export default function Settings() {
   const [showKey, setShowKey] = useState(false);
   const [keyStatus, setKeyStatus] = useState<'none' | 'testing' | 'valid' | 'invalid'>('none');
   const [hasKey, setHasKey] = useState(false);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+
+  // Load voices on mount
+  useEffect(() => {
+    const loadVoices = () => {
+      const fr = window.speechSynthesis.getVoices().filter(v => v.lang.startsWith('fr'));
+      if (fr.length > 0) setVoices(fr);
+    };
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    return () => { window.speechSynthesis.onvoiceschanged = null; };
+  }, []);
 
   useEffect(() => {
     setHasKey(hasApiKey());
@@ -86,29 +98,41 @@ export default function Settings() {
         </div>
         <select
           value={getSavedVoiceName() || ''}
-          onChange={(e) => saveVoiceName(e.target.value)}
+          onChange={(e) => {
+            saveVoiceName(e.target.value);
+            // Test the selected voice immediately
+            const u = new SpeechSynthesisUtterance('Bonjour, ça va bien');
+            u.lang = 'fr-FR';
+            const voice = window.speechSynthesis.getVoices().find(v => v.name === e.target.value);
+            if (voice) u.voice = voice;
+            window.speechSynthesis.speak(u);
+          }}
           className="w-full p-3 rounded-xl border border-gray-200 text-sm bg-white"
         >
           <option value="">自动选择最佳语音</option>
-          {getFrenchVoices().map(v => (
+          {voices.map(v => (
             <option key={v.name} value={v.name}>{v.name} ({v.lang})</option>
           ))}
         </select>
         <p className="text-[10px] text-gray-400 mt-2">
-          Chrome 的 "Google français" 或 macOS 的 "Thomas/Amélie" 最自然。
-          如果列表为空，先在浏览器中触发一次朗读再回来。
+          选择语音后自动试听。{voices.length === 0 ? '加载中...' : `共${voices.length}个法语语音可用`}
         </p>
-        <button
-          onClick={() => {
-            const u = new SpeechSynthesisUtterance('Bonjour');
-            u.lang = 'fr-FR';
-            window.speechSynthesis.speak(u);
-            setTimeout(() => window.location.reload(), 500);
-          }}
-          className="mt-2 text-xs text-blue-500 underline"
-        >
-          点击测试发音 → 刷新语音列表
-        </button>
+        {voices.length === 0 && (
+          <button
+            onClick={() => {
+              const u = new SpeechSynthesisUtterance('Bonjour');
+              u.lang = 'fr-FR'; u.volume = 0;
+              window.speechSynthesis.speak(u);
+              setTimeout(() => {
+                const fr = window.speechSynthesis.getVoices().filter(v => v.lang.startsWith('fr'));
+                if (fr.length > 0) setVoices(fr);
+              }, 500);
+            }}
+            className="mt-2 text-xs text-blue-500 underline"
+          >
+            点击加载语音列表
+          </button>
+        )}
       </div>
 
       {/* AI API Key */}

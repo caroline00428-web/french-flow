@@ -267,8 +267,165 @@ const B2_WORDS: CEFRWordPack[] = [
   },
 ];
 
+// More A2 packs
+const A2_MORE: CEFRWordPack[] = [
+  {
+    id: 'a2-weather',
+    name: '天气与季节',
+    description: 'DELF A2：描述天气、季节、气候',
+    level: 'A2', emoji: '🌤️',
+    words: [
+      { french: 'il fait beau', chinese: '天气好' },
+      { french: 'il fait chaud', chinese: '天气热' },
+      { french: 'il fait froid', chinese: '天气冷' },
+      { french: 'il pleut', chinese: '下雨' },
+      { french: 'il neige', chinese: '下雪' },
+      { french: 'il y a du vent', chinese: '有风' },
+      { french: 'il y a du soleil', chinese: '有太阳' },
+      { french: 'nuageux', chinese: '多云的' },
+      { french: 'orage', chinese: '暴风雨' },
+      { french: 'printemps', chinese: '春天' },
+      { french: 'été', chinese: '夏天' },
+      { french: 'automne', chinese: '秋天' },
+      { french: 'hiver', chinese: '冬天' },
+      { french: 'température', chinese: '温度' },
+      { french: 'degré', chinese: '度' },
+      { french: 'parapluie', chinese: '雨伞' },
+      { french: 'canicule', chinese: '酷暑' },
+    ],
+  },
+  {
+    id: 'a2-housing',
+    name: '住房与家具',
+    description: 'DELF A2：找房、家具、居住',
+    level: 'A2', emoji: '🏠',
+    words: [
+      { french: 'appartement', chinese: '公寓' },
+      { french: 'louer', chinese: '租' },
+      { french: 'loyer', chinese: '租金' },
+      { french: 'propriétaire', chinese: '房东/业主' },
+      { french: 'locataire', chinese: '租客' },
+      { french: 'déménager', chinese: '搬家' },
+      { french: 'cuisine', chinese: '厨房' },
+      { french: 'salle de bain', chinese: '浴室' },
+      { french: 'chambre', chinese: '卧室' },
+      { french: 'salon', chinese: '客厅' },
+      { french: 'balcon', chinese: '阳台' },
+      { french: 'ascenseur', chinese: '电梯' },
+      { french: 'rez-de-chaussée', chinese: '一楼' },
+      { french: 'étage', chinese: '楼层' },
+      { french: 'meuble', chinese: '家具' },
+      { french: 'canapé', chinese: '沙发' },
+      { french: 'armoire', chinese: '衣柜' },
+    ],
+  },
+];
+
+// More B1 packs
+const B1_MORE: CEFRWordPack[] = [
+  {
+    id: 'b1-media',
+    name: '媒体与科技',
+    description: 'DELF B1：新闻、网络、社交媒体',
+    level: 'B1', emoji: '📱',
+    words: [
+      { french: 'actualité', chinese: '新闻/时事' },
+      { french: 'journal', chinese: '报纸' },
+      { french: 'information', chinese: '信息' },
+      { french: 'réseaux sociaux', chinese: '社交媒体' },
+      { french: 'influenceur', chinese: '网红/博主' },
+      { french: 'écran', chinese: '屏幕' },
+      { french: 'télécharger', chinese: '下载' },
+      { french: 'partager', chinese: '分享' },
+      { french: 'commentaire', chinese: '评论' },
+      { french: 'fake news', chinese: '假新闻' },
+      { french: 'en ligne', chinese: '在线' },
+      { french: 'numérique', chinese: '数字的' },
+      { french: 'données personnelles', chinese: '个人数据' },
+      { french: 'cybersécurité', chinese: '网络安全' },
+      { french: 'intelligence artificielle', chinese: '人工智能' },
+    ],
+  },
+  {
+    id: 'b1-culture',
+    name: '文化与艺术',
+    description: 'DELF B1：电影、音乐、书籍、展览',
+    level: 'B1', emoji: '🎨',
+    words: [
+      { french: 'film', chinese: '电影' },
+      { french: 'série', chinese: '剧集' },
+      { french: 'acteur/actrice', chinese: '演员' },
+      { french: 'réalisateur', chinese: '导演' },
+      { french: 'concert', chinese: '音乐会' },
+      { french: 'exposition', chinese: '展览' },
+      { french: 'musée', chinese: '博物馆' },
+      { french: 'peinture', chinese: '绘画' },
+      { french: 'roman', chinese: '小说' },
+      { french: 'poésie', chinese: '诗歌' },
+      { french: 'spectacle', chinese: '演出' },
+      { french: 'billet', chinese: '票' },
+      { french: 'critique', chinese: '评论/影评' },
+      { french: 'chef-d\'œuvre', chinese: '杰作' },
+      { french: 'artiste', chinese: '艺术家' },
+    ],
+  },
+  {
+    id: 'b1-emotions',
+    name: '情感与观点表达',
+    description: 'DELF B1：表达感受、意见、辩论',
+    level: 'B1', emoji: '💭',
+    words: [
+      { french: 'à mon avis', chinese: '在我看来' },
+      { french: 'je pense que', chinese: '我认为' },
+      { french: 'je crois que', chinese: '我相信' },
+      { french: 'je trouve que', chinese: '我觉得' },
+      { french: 'je suis d\'accord', chinese: '我同意' },
+      { french: 'je ne suis pas d\'accord', chinese: '我不同意' },
+      { french: 'c\'est important', chinese: '这很重要' },
+      { french: 'c\'est difficile', chinese: '这很难' },
+      { french: 'c\'est intéressant', chinese: '这很有趣' },
+      { french: 'je suis content(e)', chinese: '我很高兴' },
+      { french: 'je suis triste', chinese: '我很难过' },
+      { french: 'je suis en colère', chinese: '我很生气' },
+      { french: 'je suis stressé(e)', chinese: '我很紧张' },
+      { french: 'ça m\'énerve', chinese: '这让我烦' },
+      { french: 'ça me plaît', chinese: '我喜欢这个' },
+      { french: 'je préfère', chinese: '我更喜欢' },
+      { french: 'j\'adore', chinese: '我超爱' },
+      { french: 'je déteste', chinese: '我讨厌' },
+    ],
+  },
+];
+
+// B2 expanded
+const B2_MORE: CEFRWordPack[] = [
+  {
+    id: 'b2-debate',
+    name: '辩论与论证',
+    description: 'DELF B2：议论文写作、口头辩论',
+    level: 'B2', emoji: '🗣️',
+    words: [
+      { french: 'certes', chinese: '诚然' },
+      { french: 'néanmoins', chinese: '然而' },
+      { french: 'toutefois', chinese: '不过' },
+      { french: 'en effet', chinese: '事实上' },
+      { french: 'd\'une part...d\'autre part', chinese: '一方面...另一方面' },
+      { french: 'il est vrai que', chinese: '确实' },
+      { french: 'il semble que', chinese: '似乎' },
+      { french: 'on pourrait dire que', chinese: '可以说' },
+      { french: 'la plupart des gens', chinese: '大多数人' },
+      { french: 'une minorité', chinese: '少数' },
+      { french: 'avantage', chinese: '优点' },
+      { french: 'inconvénient', chinese: '缺点' },
+      { french: 'solution', chinese: '解决方案' },
+      { french: 'conséquence', chinese: '后果' },
+      { french: 'cause', chinese: '原因' },
+    ],
+  },
+];
+
 // All packs
-export const allCEFRPacks = [...A1_WORDS, ...A2_WORDS, ...B1_WORDS, ...B2_WORDS];
+export const allCEFRPacks = [...A1_WORDS, ...A2_WORDS, ...A2_MORE, ...B1_WORDS, ...B1_MORE, ...B2_WORDS, ...B2_MORE];
 
 export function getPacksByLevel(level: string): CEFRWordPack[] {
   return allCEFRPacks.filter(p => p.level === level);

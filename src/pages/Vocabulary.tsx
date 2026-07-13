@@ -142,6 +142,13 @@ export default function Vocabulary() {
   const currentProgress = currentWord ? wordProgressMap.get(currentWord.id) : undefined;
   const currentStage = getStage(currentProgress);
 
+  // Reset card state when word changes
+  useEffect(() => {
+    setIsFlipped(false);
+    setShowResult(false);
+    setRating(null);
+  }, [currentIndex]);
+
   const handleFlip = () => {
     if (!isFlipped) {
       setIsFlipped(true);
@@ -214,9 +221,6 @@ export default function Vocabulary() {
   const handleNext = () => {
     if (currentIndex < words.length - 1) {
       setCurrentIndex(i => i + 1);
-      setIsFlipped(false);
-      setShowResult(false);
-      setRating(null);
     } else {
       setSessionComplete(true);
       if (sessionCorrect === words.length && words.length > 5) {

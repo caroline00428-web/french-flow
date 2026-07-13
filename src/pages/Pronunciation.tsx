@@ -182,6 +182,17 @@ export default function Pronunciation() {
     }
   }, [currentIndex, current, played, speak]);
 
+  // Reset state when word changes
+  useEffect(() => {
+    setHasRecorded(false);
+    setResult(null);
+    setShowTextInput(false);
+    setTextInput('');
+    setPlayed(false);
+    clearError();
+    clearAudio();
+  }, [currentIndex]);
+
   const handleRecord = () => {
     if (isListening) {
       stopListening();
@@ -227,12 +238,6 @@ export default function Pronunciation() {
   const handleNext = () => {
     if (currentIndex < pronunciationExercises.length - 1) {
       setCurrentIndex(i => i + 1);
-      setHasRecorded(false);
-      setResult(null);
-      setShowTextInput(false);
-      setTextInput('');
-      setPlayed(false);
-      clearError();
     } else {
       setSessionComplete(true);
     }
