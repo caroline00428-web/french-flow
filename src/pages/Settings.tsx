@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useGameStore } from '../store/useGameStore';
-import { Target, Download, Trash2, Info, Key, Check, Eye, EyeOff, ExternalLink } from 'lucide-react';
+import { Target, Download, Trash2, Info, Key, Check, Eye, EyeOff, ExternalLink, Volume2 } from 'lucide-react';
 import { hasApiKey, setApiKey, clearApiKey, testApiKey, getProvider } from '../services/gemini';
+import { getFrenchVoices, getSavedVoiceName, saveVoiceName } from '../hooks/useTTS';
 
 export default function Settings() {
   const progress = useGameStore(s => s.progress);
@@ -75,6 +76,39 @@ export default function Settings() {
           </button>
         </div>
         <p className="text-xs text-[var(--color-text-secondary)] mt-2">设定每天想获得的经验值 (10-500 XP)</p>
+      </div>
+
+      {/* Voice Selection */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <div className="flex items-center gap-2 mb-3">
+          <Volume2 size={18} className="text-blue-500" />
+          <span className="font-semibold text-sm">法语发音语音</span>
+        </div>
+        <select
+          value={getSavedVoiceName() || ''}
+          onChange={(e) => saveVoiceName(e.target.value)}
+          className="w-full p-3 rounded-xl border border-gray-200 text-sm bg-white"
+        >
+          <option value="">自动选择最佳语音</option>
+          {getFrenchVoices().map(v => (
+            <option key={v.name} value={v.name}>{v.name} ({v.lang})</option>
+          ))}
+        </select>
+        <p className="text-[10px] text-gray-400 mt-2">
+          Chrome 的 "Google français" 或 macOS 的 "Thomas/Amélie" 最自然。
+          如果列表为空，先在浏览器中触发一次朗读再回来。
+        </p>
+        <button
+          onClick={() => {
+            const u = new SpeechSynthesisUtterance('Bonjour');
+            u.lang = 'fr-FR';
+            window.speechSynthesis.speak(u);
+            setTimeout(() => window.location.reload(), 500);
+          }}
+          className="mt-2 text-xs text-blue-500 underline"
+        >
+          点击测试发音 → 刷新语音列表
+        </button>
       </div>
 
       {/* AI API Key */}

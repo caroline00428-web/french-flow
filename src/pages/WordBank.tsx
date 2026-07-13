@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { wordBankDB, type SavedWord } from '../services/wordBank';
 import { useTTS } from '../hooks/useTTS';
-import { Search, Volume2, Trash2, ChevronRight, Plus, Check, Download, Upload } from 'lucide-react';
-import { generateWordPacks, downloadWordPack, importWordPack } from '../services/wordBank';
+import { Search, Volume2, Trash2, ChevronRight, Plus, Check } from 'lucide-react';
+import { allCEFRPacks } from '../data/cefrPacks';
 
 export default function WordBank() {
   const navigate = useNavigate();
@@ -128,6 +128,64 @@ export default function WordBank() {
         </div>
       )}
 
+      {/* CEFR Word Packs — one-click add */}
+      <div>
+        <p className="text-xs font-medium text-gray-400 mb-2">DELF/DALF 考试词包 · 点击导入</p>
+        <div className="flex gap-1.5 overflow-x-auto pb-1">
+          {['A1', 'A2', 'B1', 'B2'].map(level => (
+            <button
+              key={level}
+              onClick={() => setTagFilter(level === tagFilter ? null : level)}
+              className={`shrink-0 px-3 py-1 rounded-full text-[11px] font-medium ${
+                tagFilter === level ? 'bg-[var(--color-primary)] text-white' : 'bg-white border border-gray-200 text-gray-500'
+              }`}
+            >
+              {level}
+            </button>
+          ))}
+        </div>
+        <div className="grid gap-2 mt-2">
+          {allCEFRPacks.filter(p => !tagFilter || p.level === tagFilter).slice(0, 6).map(pack => (
+            <div key={pack.id} className="bg-white rounded-xl p-3 border border-gray-100 flex items-center justify-between">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-lg">{pack.emoji}</span>
+                <div className="min-w-0">
+                  <div className="text-sm font-medium truncate">{pack.name}</div>
+                  <div className="text-[10px] text-gray-400">{pack.description} · {pack.words.length}词</div>
+                </div>
+              </div>
+              <button
+                onClick={async () => {
+                  let count = 0;
+                  for (const w of pack.words) {
+                    const exists = await wordBankDB.savedWords.where('french').equals(w.french).first();
+                    if (!exists) {
+                      await wordBankDB.savedWords.put({
+                        id: Date.now().toString() + '_' + Math.random().toString(36).slice(2, 6),
+                        french: w.french,
+                        translation: w.chinese,
+                        notes: '',
+                        tags: [pack.level, pack.name],
+                        createdAt: new Date().toISOString(),
+                        lastReviewed: new Date().toISOString(),
+                        reviewCount: 0,
+                        mastered: false,
+                      });
+                      count++;
+                    }
+                  }
+                  alert(`已添加 ${count} 个新词到词库！`);
+                  loadWords();
+                }}
+                className="shrink-0 px-3 py-1.5 bg-[var(--color-primary)] text-white text-xs font-bold rounded-full"
+              >
+                添加
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Word list */}
       {words.length === 0 ? (
         <div className="text-center py-12">
@@ -138,39 +196,6 @@ export default function WordBank() {
             className="mt-4 px-6 py-3 bg-[var(--color-primary)] text-white font-bold rounded-xl text-sm">
             去添加单词 →
           </button>
-
-          {/* Download word packs */}
-          <div className="mt-6 space-y-2">
-            <p className="text-xs text-gray-400">或下载预置词包快速填充</p>
-            {generateWordPacks().map((pack, i) => (
-              <button
-                key={i}
-                onClick={() => downloadWordPack(pack)}
-                className="w-full flex items-center justify-between px-4 py-3 bg-white rounded-xl border border-gray-200 hover:border-[var(--color-primary)]"
-              >
-                <div className="text-left">
-                  <div className="text-sm font-medium">{pack.name}</div>
-                  <div className="text-xs text-gray-400">{pack.description} · {pack.wordCount}词</div>
-                </div>
-                <Download size={16} className="text-gray-400" />
-              </button>
-            ))}
-            <label className="w-full flex items-center justify-between px-4 py-3 bg-blue-50 rounded-xl border border-blue-200 cursor-pointer hover:bg-blue-100">
-              <div className="text-left">
-                <div className="text-sm font-medium text-blue-600">导入词包</div>
-                <div className="text-xs text-blue-400">从JSON文件导入词汇</div>
-              </div>
-              <Upload size={16} className="text-blue-400" />
-              <input type="file" accept=".json" className="hidden" onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  const count = await importWordPack(file);
-                  alert(`成功导入 ${count} 个新词！`);
-                  loadWords();
-                }
-              }} />
-            </label>
-          </div>
         </div>
       ) : (
         <div className="space-y-2">

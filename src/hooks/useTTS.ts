@@ -1,7 +1,7 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 // ============================================================
-// Robust TTS hook — handles queue, prevents cutoff, supports replay
+// TTS with French voice selection for natural pronunciation
 // ============================================================
 
 interface TTSState {
@@ -11,43 +11,79 @@ interface TTSState {
   error: string | null;
 }
 
+// Get best available French voice
+function getBestFrenchVoice(): SpeechSynthesisVoice | null {
+  const voices = window.speechSynthesis.getVoices();
+  if (voices.length === 0) return null;
+
+  // Priority order for natural French voices
+  const preferred = [
+    'Google français',        // Chrome — most natural
+    'French France',          // Chrome alt
+    'Thomas',                 // macOS — very natural
+    'Amélie',                 // macOS — female voice
+    'Microsoft Hortense',     // Windows — French female
+    'Microsoft Paul',         // Windows — French male
+  ];
+
+  for (const name of preferred) {
+    const v = voices.find(v => v.name.includes(name) && v.lang.startsWith('fr'));
+    if (v) return v;
+  }
+
+  // Any fr-FR voice as fallback
+  const fr = voices.find(v => v.lang.startsWith('fr-FR')) || voices.find(v => v.lang.startsWith('fr'));
+  return fr || null;
+}
+
+// Get all French voices
+export function getFrenchVoices(): SpeechSynthesisVoice[] {
+  return window.speechSynthesis.getVoices().filter(v => v.lang.startsWith('fr'));
+}
+
+// Load saved voice preference
+export function getSavedVoiceName(): string | null {
+  return localStorage.getItem('ff_voice');
+}
+
+export function saveVoiceName(name: string): void {
+  localStorage.setItem('ff_voice', name);
+}
+
 export function useTTS() {
   const [state, setState] = useState<TTSState>({
-    isSpeaking: false,
-    isPaused: false,
-    currentText: null,
-    error: null,
+    isSpeaking: false, isPaused: false, currentText: null, error: null,
   });
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
-
-  const cancel = useCallback(() => {
-    window.speechSynthesis.cancel();
-    utteranceRef.current = null;
-    setState({ isSpeaking: false, isPaused: false, currentText: null, error: null });
-  }, []);
 
   const speak = useCallback((text: string, options?: { rate?: number; lang?: string; onEnd?: () => void }) => {
     if (!('speechSynthesis' in window)) {
-      setState(s => ({ ...s, error: '浏览器不支持语音合成' }));
+      setState(s => ({ ...s, error: '浏览器不支持' }));
       return;
     }
 
-    // Cancel any current speech
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = options?.lang || 'fr-FR';
-    utterance.rate = options?.rate || 0.85;
+    utterance.rate = options?.rate || 0.9;
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
 
-    // Workaround for Chrome bug where speech stops after ~15s
-    // We use a keep-alive interval
+    // Try to use saved/best French voice
+    const savedVoice = getSavedVoiceName();
+    if (savedVoice) {
+      const voice = window.speechSynthesis.getVoices().find(v => v.name === savedVoice);
+      if (voice) utterance.voice = voice;
+    }
+    if (!utterance.voice) {
+      const best = getBestFrenchVoice();
+      if (best) utterance.voice = best;
+    }
+
     let keepAliveInterval: ReturnType<typeof setInterval> | null = null;
 
     utterance.onstart = () => {
       setState({ isSpeaking: true, isPaused: false, currentText: text, error: null });
-      // Chrome timeout workaround: periodically pause/resume to keep alive
       keepAliveInterval = setInterval(() => {
         if (window.speechSynthesis.speaking) {
           window.speechSynthesis.pause();
@@ -58,100 +94,35 @@ export function useTTS() {
 
     utterance.onend = () => {
       if (keepAliveInterval) clearInterval(keepAliveInterval);
-      utteranceRef.current = null;
       setState({ isSpeaking: false, isPaused: false, currentText: null, error: null });
       options?.onEnd?.();
     };
 
     utterance.onerror = (event) => {
       if (keepAliveInterval) clearInterval(keepAliveInterval);
-      // 'canceled' is expected when we intentionally cancel
       if (event.error !== 'canceled') {
-        setState(s => ({ ...s, isSpeaking: false, error: `语音播放失败: ${event.error}` }));
+        setState(s => ({ ...s, isSpeaking: false, error: `语音失败: ${event.error}` }));
       }
-      utteranceRef.current = null;
     };
 
-    utteranceRef.current = utterance;
     window.speechSynthesis.speak(utterance);
   }, []);
 
-  const pause = useCallback(() => {
-    window.speechSynthesis.pause();
-    setState(s => ({ ...s, isPaused: true }));
+  const cancel = useCallback(() => {
+    window.speechSynthesis.cancel();
+    setState({ isSpeaking: false, isPaused: false, currentText: null, error: null });
   }, []);
 
-  const resume = useCallback(() => {
-    window.speechSynthesis.resume();
-    setState(s => ({ ...s, isPaused: false }));
-  }, []);
+  const pause = useCallback(() => { window.speechSynthesis.pause(); setState(s => ({ ...s, isPaused: true })); }, []);
+  const resume = useCallback(() => { window.speechSynthesis.resume(); setState(s => ({ ...s, isPaused: false })); }, []);
 
-  // Speak a list of texts sequentially
-  const speakSequence = useCallback(async (
-    texts: string[],
-    options?: { rate?: number; lang?: string; delayBetween?: number }
-  ) => {
-    const delay = options?.delayBetween || 800;
-    for (let i = 0; i < texts.length; i++) {
-      await new Promise<void>((resolve) => {
-        speak(texts[i], {
-          ...options,
-          onEnd: () => {
-            setTimeout(resolve, delay);
-          },
-        });
-      });
-    }
-  }, [speak]);
-
-  return {
-    ...state,
-    speak,
-    speakSequence,
-    cancel,
-    pause,
-    resume,
-  };
+  return { ...state, speak, cancel, pause, resume };
 }
 
-// ============================================================
-// Speak a French word with proper pronunciation
-// ============================================================
-export function speakFrench(text: string, rate = 0.85): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (!('speechSynthesis' in window)) {
-      reject(new Error('Speech synthesis not supported'));
-      return;
-    }
-    window.speechSynthesis.cancel();
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'fr-FR';
-    utterance.rate = rate;
-    utterance.pitch = 1.0;
-
-    let keepAlive: ReturnType<typeof setInterval> | null = null;
-
-    utterance.onstart = () => {
-      keepAlive = setInterval(() => {
-        if (window.speechSynthesis.speaking) {
-          window.speechSynthesis.pause();
-          window.speechSynthesis.resume();
-        }
-      }, 5000);
-    };
-
-    utterance.onend = () => {
-      if (keepAlive) clearInterval(keepAlive);
-      resolve();
-    };
-
-    utterance.onerror = (e) => {
-      if (keepAlive) clearInterval(keepAlive);
-      if (e.error !== 'canceled') reject(new Error(e.error));
-      else resolve();
-    };
-
-    window.speechSynthesis.speak(utterance);
-  });
+// Pre-load voices (call once on app start)
+export function initVoices(): void {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+  }
 }

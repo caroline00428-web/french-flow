@@ -36,27 +36,19 @@ export function clearApiKey(): void {
   localStorage.removeItem('frenchflow_api_provider');
 }
 
-// Build system prompt
+// Build system prompt — optimized for short, fast replies
 function buildSystemPrompt(context?: TutorContext): string {
-  const base = `你是 "Professeur Léo"（莱奥教授），一只住在巴黎的猫咪🐱🇫🇷，也是友好的法语家教老师。
-
-教学风格：
-- 用简单易懂的中文解释，配法语例子和发音提示
-- 用故事和类比来讲语法，不是枯燥的规则
-- 给实际法国生活中用得到的例子
-- 温柔纠正错误，多鼓励
-- 回复简洁（2-4段），除非学生要求更多细节
-- 每次教新词务必标注发音
-
-你的专长：法语语法(A0-C2)、发音和音标、法国文化和习俗、学习技巧、中英法翻译、DELF/DALF考试、在法国工作`;
+  const base = `你是法国法语家教"Léo"🐱。回复规则：
+- 用中文回答，3-5句话以内
+- 直接给答案，不铺垫
+- 法语例子配中文翻译
+- 新手友好，用最简单的话解释`;
 
   if (context) {
     const ctxParts: string[] = [];
-    if (context.currentPage) ctxParts.push(`学生当前在"${context.currentPage}"页面。`);
-    if (context.currentWord) ctxParts.push(`学生正在学:"${context.currentWord}"。`);
-    if (context.currentLesson) ctxParts.push(`学生正在学:"${context.currentLesson}"。`);
-    if (context.userLevel) ctxParts.push(`学生法语水平约:${context.userLevel}。`);
-    if (ctxParts.length > 0) return base + '\n\n当前上下文:\n' + ctxParts.join('\n');
+    if (context.currentPage) ctxParts.push(`学生正在"${context.currentPage}"页面`);
+    if (context.currentWord) ctxParts.push(`正在查词:"${context.currentWord}"`);
+    if (ctxParts.length > 0) return base + '\n' + ctxParts.join('；');
   }
   return base;
 }
@@ -99,7 +91,7 @@ async function askZhipu(
       model: 'glm-4-flash',
       messages,
       temperature: 0.7,
-      max_tokens: 800,
+      max_tokens: 200,
     }),
   });
 
