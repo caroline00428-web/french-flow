@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '../store/useGameStore';
 import { hasApiKey } from '../services/gemini';
-import { Zap, BookOpen, Settings, Trophy, Star, TrendingUp } from 'lucide-react';
+import { Zap, BookOpen, Settings, Trophy, Star, TrendingUp, Mic } from 'lucide-react';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -47,9 +47,8 @@ export default function Profile() {
       {/* Menu items */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <MenuItem icon={<BookOpen size={18} className="text-blue-500" />} label="学习课程" onClick={() => navigate('/learn')} />
+        <MenuItem icon={<Mic size={18} className="text-red-500" />} label="每日一音 🎯" onClick={() => navigate('/dailysound')} subtitle="30天发音训练" />
         <MenuItem icon={<Star size={18} className="text-purple-500" />} label="故事阅读" onClick={() => navigate('/scripts')} />
-        <MenuItem icon={<Zap size={18} className="text-orange-500" />} label="朗读练习" onClick={() => navigate('/reading')} />
-        <MenuItem icon={<Trophy size={18} className="text-amber-500" />} label="成就徽章" onClick={() => navigate('/achievements')} />
         <MenuItem icon={<TrendingUp size={18} className="text-green-500" />} label="语法故事" onClick={() => navigate('/grammar')} />
       </div>
 
