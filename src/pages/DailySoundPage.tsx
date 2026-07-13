@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTTS } from '../hooks/useTTS';
-import { getTodayLesson, getLessonByDay, type DailySoundLesson } from '../data/dailySound';
-import { Volume2, ArrowRight, ArrowLeft, Target, Repeat, Zap, Check, ChevronRight } from 'lucide-react';
+import { getTodayLesson, getLessonByDay } from '../data/dailySound';
+import { Volume2 } from 'lucide-react';
 
 export default function DailySoundPage() {
   const { speak } = useTTS();
