@@ -150,17 +150,9 @@ export default function Vocabulary() {
   }, [currentIndex]);
 
   const handleFlip = () => {
-    if (!isFlipped) {
-      setIsFlipped(true);
-      // Speak the word
-      speak(currentWord.french, { rate: 0.85 });
-      // Also speak example sentence after a delay
-      if (currentWord.exampleSentence) {
-        setTimeout(() => {
-          speak(currentWord.exampleSentence!, { rate: 0.8 });
-        }, 2000);
-      }
-    }
+    if (isFlipped || showResult) return;
+    setIsFlipped(true);
+    try { speak(currentWord.french, { rate: 0.85 }); } catch {}
   };
 
   const handleRate = async (quality: number) => {
@@ -395,7 +387,7 @@ export default function Vocabulary() {
 
       {/* Flashcard */}
       <div
-        onClick={!isFlipped ? handleFlip : undefined}
+        onClick={() => { if (!isFlipped && !showResult) handleFlip(); }}
         className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 min-h-[260px] flex flex-col items-center justify-center cursor-pointer select-none"
       >
         <div className="text-center">
