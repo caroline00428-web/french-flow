@@ -402,7 +402,3 @@ export function getAllPhrases(): { french: string; chinese: string }[] {
 export function getPhraseCount(): number {
   return phrasebook.reduce((sum, c) => sum + c.sentences.length, 0);
 }
-
-export function getPhraseCount(): number {
-  return phrasebook.reduce((sum, c) => sum + c.sentences.length, 0);
-}
