@@ -47,10 +47,10 @@ export default function Profile() {
       {/* Menu items */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <MenuItem icon={<BookOpen size={18} className="text-blue-500" />} label="学习课程" onClick={() => navigate('/learn')} />
+        <MenuItem icon={<Star size={18} className="text-purple-500" />} label="故事阅读" onClick={() => navigate('/scripts')} />
+        <MenuItem icon={<Zap size={18} className="text-orange-500" />} label="朗读练习" onClick={() => navigate('/reading')} />
         <MenuItem icon={<Trophy size={18} className="text-amber-500" />} label="成就徽章" onClick={() => navigate('/achievements')} />
-        <MenuItem icon={<Star size={18} className="text-purple-500" />} label="朗读练习" onClick={() => navigate('/reading')} />
-        <MenuItem icon={<Zap size={18} className="text-orange-500" />} label="语法故事" onClick={() => navigate('/grammar')} />
-        <MenuItem icon={<TrendingUp size={18} className="text-green-500" />} label="情景对话" onClick={() => navigate('/story')} />
+        <MenuItem icon={<TrendingUp size={18} className="text-green-500" />} label="语法故事" onClick={() => navigate('/grammar')} />
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">

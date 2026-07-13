@@ -268,6 +268,194 @@ addEntry('poisson', '鱼', 'pwah-sohn');
 addEntry('cheval', '马', 'shuh-vahl');
 addEntry('lapin', '兔子', 'lah-pan');
 
+// === Clothing / 服装 ===
+addEntry('vêtement', '衣服', 'vet-mahn');
+addEntry('chemise', '衬衫', 'shuh-meez');
+addEntry('pantalon', '裤子', 'pahn-tah-lohn');
+addEntry('robe', '连衣裙', 'rob');
+addEntry('jupe', '裙子', 'zhewp');
+addEntry('chaussure', '鞋子', 'shoh-sewr');
+addEntry('chapeau', '帽子', 'shah-poh');
+addEntry('manteau', '大衣', 'mahn-toh');
+addEntry('pull', '毛衣', 'pewl');
+addEntry('écharpe', '围巾', 'ay-sharp');
+addEntry('gant', '手套', 'gahn');
+addEntry('sac', '包', 'sak');
+addEntry('lunettes', '眼镜', 'lew-net');
+addEntry('montre', '手表', 'mohn-tr');
+addEntry('bague', '戒指', 'bahg');
+addEntry('boucle d\'oreille', '耳环', 'bookl doh-ray');
+
+// === Home / 家居 ===
+addEntry('chambre', '卧室', 'shahm-br');
+addEntry('cuisine', '厨房', 'kwee-zeen');
+addEntry('salon', '客厅', 'sah-lohn');
+addEntry('salle de bain', '浴室', 'sal duh ban');
+addEntry('table', '桌子', 'tah-bl');
+addEntry('chaise', '椅子', 'shez');
+addEntry('lit', '床', 'lee');
+addEntry('fenêtre', '窗户', 'fuh-netr');
+addEntry('porte', '门', 'port');
+addEntry('toit', '屋顶', 'twah');
+addEntry('escalier', '楼梯', 'es-kal-yay');
+addEntry('jardin', '花园', 'zhar-dan');
+addEntry('clé', '钥匙', 'klay');
+addEntry('miroir', '镜子', 'mee-rwahr');
+addEntry('lampe', '灯', 'lahmp');
+
+// === Education / 教育 ===
+addEntry('livre', '书', 'leevr');
+addEntry('cahier', '笔记本', 'kah-yay');
+addEntry('stylo', '笔', 'stee-loh');
+addEntry('crayon', '铅笔', 'kray-ohn');
+addEntry('gomme', '橡皮', 'gom');
+addEntry('règle', '尺子', 'regl');
+addEntry('professeur', '老师', 'pro-fes-eur');
+addEntry('étudiant', '学生', 'ay-tew-dee-ahn');
+addEntry('examen', '考试', 'eg-zah-man');
+addEntry('devoir', '作业', 'duh-vwahr');
+addEntry('leçon', '课', 'luh-sohn');
+addEntry('université', '大学', 'ew-nee-ver-see-tay');
+addEntry('bibliothèque', '图书馆', 'bee-blee-oh-tek');
+addEntry('diplôme', '文凭', 'dee-plohm');
+addEntry('matière', '学科', 'mah-tee-ehr');
+addEntry('note', '分数', 'not');
+
+// === Emotions / 情感 ===
+addEntry('amour', '爱', 'ah-moor');
+addEntry('joie', '快乐', 'zhwah');
+addEntry('tristesse', '悲伤', 'trees-tes');
+addEntry('colère', '愤怒', 'koh-lehr');
+addEntry('peur', '害怕', 'peur');
+addEntry('surprise', '惊讶', 'sewr-preez');
+addEntry('espoir', '希望', 'es-pwahr');
+addEntry('ennui', '无聊', 'ahn-nwee');
+addEntry('jalousie', '嫉妒', 'zhah-loo-zee');
+addEntry('fierté', '骄傲', 'fee-ehr-tay');
+addEntry('honte', '羞愧', 'ohnt');
+addEntry('curiosité', '好奇心', 'kew-ree-oh-zee-tay');
+addEntry('soulagement', '宽慰', 'soo-lazh-mahn');
+addEntry('nostalgie', '怀旧', 'nos-tal-zhee');
+
+// === Technology / 科技 ===
+addEntry('téléphone', '电话', 'tay-lay-fon');
+addEntry('portable', '手机', 'por-tah-bl');
+addEntry('écran', '屏幕', 'ay-krahn');
+addEntry('clavier', '键盘', 'klahv-yay');
+addEntry('souris', '鼠标', 'soo-ree');
+addEntry('internet', '互联网', 'an-ter-net');
+addEntry('réseau', '网络', 'ray-zoh');
+addEntry('application', '应用程序', 'ah-plee-kah-syohn');
+addEntry('mot de passe', '密码', 'moh duh pahs');
+addEntry('donnée', '数据', 'doh-nay');
+addEntry('logiciel', '软件', 'loh-zhee-see-el');
+addEntry('matériel', '硬件', 'mah-tay-ree-el');
+addEntry('site web', '网站', 'seet web');
+addEntry('courriel', '电子邮件', 'koo-ree-el');
+addEntry('télécharger', '下载', 'tay-lay-shar-zhay');
+addEntry('imprimer', '打印', 'am-pree-may');
+
+// === Nature / 自然 ===
+addEntry('arbre', '树', 'arbr');
+addEntry('fleur', '花', 'fleuhr');
+addEntry('plante', '植物', 'plahnt');
+addEntry('forêt', '森林', 'foh-ray');
+addEntry('montagne', '山', 'mohn-tahn-yuh');
+addEntry('rivière', '河', 'ree-vee-ehr');
+addEntry('mer', '海', 'mehr');
+addEntry('lac', '湖', 'lak');
+addEntry('ciel', '天空', 'see-el');
+addEntry('terre', '地球；土地', 'tehr');
+addEntry('lune', '月亮', 'lewn');
+addEntry('étoile', '星星', 'ay-twahl');
+addEntry('feu', '火', 'feuh');
+addEntry('air', '空气', 'ehr');
+addEntry('sable', '沙子', 'sah-bl');
+addEntry('pierre', '石头', 'pee-ehr');
+
+// === Sports / 运动 ===
+addEntry('sport', '运动', 'spor');
+addEntry('football', '足球', 'foot-bohl');
+addEntry('natation', '游泳', 'nah-tah-syohn');
+addEntry('course', '跑步', 'koors');
+addEntry('vélo', '自行车', 'vay-loh');
+addEntry('tennis', '网球', 'teh-nees');
+addEntry('basket', '篮球', 'bahs-ket');
+addEntry('ski', '滑雪', 'skee');
+addEntry('danse', '跳舞', 'dahns');
+addEntry('gymnastique', '体操', 'zheem-nah-steek');
+addEntry('match', '比赛', 'match');
+addEntry('équipe', '团队', 'ay-keep');
+addEntry('joueur', '选手', 'zhoo-euhr');
+addEntry('gagner', '赢', 'gah-nyay');
+addEntry('perdre', '输', 'pehr-dr');
+
+// === Shopping / 购物 ===
+addEntry('magasin', '商店', 'mah-gah-zan');
+addEntry('marché', '市场', 'mar-shay');
+addEntry('prix', '价格', 'pree');
+addEntry('cher', '贵的', 'shehr');
+addEntry('bon marché', '便宜的', 'bohn mar-shay');
+addEntry('acheter', '买', 'ah-shuh-tay');
+addEntry('vendre', '卖', 'vahn-dr');
+addEntry('carte', '卡', 'kart');
+addEntry('argent', '钱', 'ar-zhahn');
+addEntry('monnaie', '零钱', 'moh-nay');
+addEntry('reçu', '收据', 'ruh-sew');
+addEntry('remise', '折扣', 'ruh-meez');
+addEntry('gratuit', '免费的', 'grah-twee');
+addEntry('payer', '付款', 'pay-yay');
+addEntry('commander', '订购', 'koh-mahn-day');
+addEntry('livraison', '送货', 'lee-vray-zohn');
+
+// === Banking / 金融 ===
+addEntry('banque', '银行', 'bahnk');
+addEntry('compte', '账户', 'kohmt');
+addEntry('carte bancaire', '银行卡', 'kart bahn-kehr');
+addEntry('crédit', '信用', 'kray-dee');
+addEntry('dépenser', '花费', 'day-pahn-say');
+addEntry('économiser', '储蓄', 'ay-koh-noh-mee-zay');
+addEntry('impôt', '税', 'am-poh');
+addEntry('assurance', '保险', 'ah-sew-rahns');
+addEntry('investir', '投资', 'an-ves-teer');
+addEntry('budget', '预算', 'bew-zhay');
+
+// === Health / 医疗 ===
+addEntry('santé', '健康', 'sahn-tay');
+addEntry('malade', '生病的', 'mah-lahd');
+addEntry('médecin', '医生', 'med-san');
+addEntry('médicament', '药物', 'may-dee-kah-mahn');
+addEntry('hôpital', '医院', 'oh-pee-tahl');
+addEntry('dentiste', '牙医', 'dahn-teest');
+addEntry('ordonnance', '处方', 'or-doh-nahns');
+addEntry('blessure', '伤口', 'bles-sewr');
+addEntry('fièvre', '发烧', 'fee-ehvr');
+addEntry('toux', '咳嗽', 'too');
+addEntry('rhume', '感冒', 'rewm');
+addEntry('allergie', '过敏', 'ah-lehr-zhee');
+
+// === Advanced / 进阶词汇 ===
+addEntry('habitude', '习惯', 'ah-bee-tewd');
+addEntry('expérience', '经验', 'ex-pay-ree-ahns');
+addEntry('aventure', '冒险', 'ah-vahn-tewr');
+addEntry('liberté', '自由', 'lee-behr-tay');
+addEntry('égalité', '平等', 'ay-gah-lee-tay');
+addEntry('fraternité', '博爱', 'frah-tehr-nee-tay');
+addEntry('respect', '尊重', 'res-pay');
+addEntry('confiance', '信任', 'kohn-fee-ahns');
+addEntry('patience', '耐心', 'pah-see-ahns');
+addEntry('courage', '勇气', 'koo-razh');
+addEntry('intelligence', '智慧', 'an-tel-ee-zhahns');
+addEntry('imagination', '想象力', 'ee-mah-zhee-nah-syohn');
+addEntry('connaissance', '知识', 'koh-nay-sahns');
+addEntry('sagesse', '智慧', 'sah-zhes');
+addEntry('bonheur', '幸福', 'boh-neuhr');
+addEntry('succès', '成功', 'sewk-say');
+addEntry('échec', '失败', 'ay-shek');
+addEntry('progrès', '进步', 'pro-gray');
+addEntry('changement', '变化', 'shahnzh-mahn');
+addEntry('choix', '选择', 'shwah');
+
 // ============================================================
 // Dictionary lookup
 // ============================================================

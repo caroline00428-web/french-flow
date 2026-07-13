@@ -17,6 +17,7 @@ import Dictation from './pages/Dictation';
 import Grammar from './pages/Grammar';
 import Story from './pages/Story';
 import Reading from './pages/Reading';
+import ScriptsPage from './pages/ScriptsPage';
 import Tutor from './pages/Tutor';
 import Achievements from './pages/Achievements';
 import Settings from './pages/Settings';
@@ -41,7 +42,7 @@ export default function App() {
   }
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/french-flow">
       <Routes>
         <Route element={<Layout />}>
           {/* Main 4 tabs */}
@@ -58,6 +59,7 @@ export default function App() {
           <Route path="/grammar" element={<Grammar />} />
           <Route path="/story" element={<Story />} />
           <Route path="/reading" element={<Reading />} />
+          <Route path="/scripts" element={<ScriptsPage />} />
           <Route path="/tutor" element={<Tutor />} />
           <Route path="/achievements" element={<Achievements />} />
           <Route path="/settings" element={<Settings />} />
