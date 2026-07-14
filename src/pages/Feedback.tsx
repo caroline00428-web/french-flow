@@ -54,26 +54,8 @@ export default function Feedback() {
           </button>
         </div>
         <p className="text-[10px] text-blue-400 mt-2">
-          ① 复制邮箱地址 → ② 点击「打开邮箱」→ ③ 粘贴邮箱 → ④ 粘贴内容到邮件正文。
+          ① 复制邮箱 → ② 点「打开邮箱」→ ③ 粘贴邮箱和内容到邮件。
         </p>
-        </div>
-        <p className="text-[10px] text-blue-400 mt-2">
-          点击「打开邮箱发送」会自动打开你电脑的默认邮件程序，附上你写的内容。
-        </p>
-      </div>
-
-      {/* Quick copy email */}
-      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-        <p className="text-sm font-medium mb-2">其他联系方式</p>
-        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-          <span className="text-sm text-gray-600">{EMAIL}</span>
-          <button
-            onClick={() => { navigator.clipboard.writeText(EMAIL); }}
-            className="flex items-center gap-1 px-3 py-1.5 bg-gray-200 text-gray-600 rounded-lg text-xs font-medium"
-          >
-            <Copy size={12} /> 复制
-          </button>
-        </div>
       </div>
 
       {/* History */}
