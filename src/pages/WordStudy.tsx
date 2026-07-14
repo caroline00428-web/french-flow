@@ -1,13 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { wordBankDB, type SavedWord } from '../services/wordBank';
 import { useTTS } from '../hooks/useTTS';
-import { Volume2, ArrowRight, ArrowLeft, Check, X, Target, Shuffle, Headphones, Brain, RotateCcw, ChevronRight } from 'lucide-react';
+import { Volume2, Shuffle, Headphones, Brain } from 'lucide-react';
 
 type StudyMode = 'listen-pick' | 'random' | 'weak';
 
 export default function WordStudy() {
-  const navigate = useNavigate();
   const { speak } = useTTS();
   const [words, setWords] = useState<SavedWord[]>([]);
   const [allWords, setAllWords] = useState<SavedWord[]>([]);
@@ -205,7 +203,7 @@ export default function WordStudy() {
               let cls = 'bg-white border-gray-200';
               if (showResult) {
                 if (opt === word.translation) cls = 'bg-green-50 border-green-300 text-green-700';
-                else if (opt === isCorrect === false ? opt : '') cls = 'bg-red-50 border-red-300';
+                else if (isCorrect === false) cls = 'bg-red-50 border-red-300 text-red-600';
                 else cls = 'opacity-40';
               }
               return (
