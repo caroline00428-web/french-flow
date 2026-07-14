@@ -177,7 +177,6 @@ export default function Pronunciation() {
   const [textInput, setTextInput] = useState('');
   const [played, setPlayed] = useState(false);
   const [zhipuText, setZhipuText] = useState<string | null>(null);
-  const [sttSource, setSttSource] = useState<'zhipu' | 'browser' | 'none'>('none');
 
   const current = pronunciationExercises[currentIndex];
 
@@ -200,7 +199,6 @@ export default function Pronunciation() {
     setTextInput('');
     setPlayed(false);
     setZhipuText(null);
-    setSttSource('none');
     clearError();
     clearAudio();
     reset();
@@ -216,7 +214,6 @@ export default function Pronunciation() {
         const result = await transcribeHybrid(blob, transcript);
         if (result.text) {
           setZhipuText(result.text);
-          setSttSource(result.source);
           if (!transcript) {
             // If browser STT failed, use Zhipu result directly
             const comp = comparePronunciation(current.french, result.text);
