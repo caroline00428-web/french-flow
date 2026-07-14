@@ -20,6 +20,7 @@ import Reading from './pages/Reading';
 import ScriptsPage from './pages/ScriptsPage';
 import PhonicsPage from './pages/PhonicsPage';
 import DailySoundPage from './pages/DailySoundPage';
+import WordStudy from './pages/WordStudy';
 import Tutor from './pages/Tutor';
 import Achievements from './pages/Achievements';
 import Settings from './pages/Settings';
@@ -64,6 +65,7 @@ export default function App() {
           <Route path="/scripts" element={<ScriptsPage />} />
           <Route path="/phonics" element={<PhonicsPage />} />
           <Route path="/dailysound" element={<DailySoundPage />} />
+          <Route path="/wordstudy" element={<WordStudy />} />
           <Route path="/tutor" element={<Tutor />} />
           <Route path="/achievements" element={<Achievements />} />
           <Route path="/settings" element={<Settings />} />

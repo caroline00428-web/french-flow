@@ -87,10 +87,16 @@ export default function WordBank() {
             {totalCount}个词 · {masteredCount}个已掌握
           </p>
         </div>
-        <button onClick={() => navigate('/')}
-          className="flex items-center gap-1 px-3 py-1.5 bg-[var(--color-primary)] text-white rounded-full text-xs font-bold">
-          <Plus size={14} /> 添加
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => navigate('/wordstudy')}
+            className="flex items-center gap-1 px-3 py-1.5 bg-[var(--color-primary)] text-white rounded-full text-xs font-bold">
+            📝 背单词
+          </button>
+          <button onClick={() => navigate('/')}
+            className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
+            <Plus size={14} /> 添加
+          </button>
+        </div>
       </div>
 
       {/* Search + Filter */}
