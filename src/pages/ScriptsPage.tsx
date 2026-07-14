@@ -1,66 +1,19 @@
 import { useState } from 'react';
-import { useGameStore } from '../store/useGameStore';
-import { wordBankDB, lookupWord } from '../services/wordBank';
-import { useTTS } from '../hooks/useTTS';
-import { speakSlow } from '../hooks/useTTS';
+import { wordBankDB } from '../services/wordBank';
+import { useTTS, speakSlow } from '../hooks/useTTS';
 import TappableText from '../components/TappableText';
 import { getAllStories, downloadStoryAsHTML, downloadAllStoriesAsBook, type Story } from '../data/stories';
 import { illustratedReadings, type IllustratedReading } from '../data/illustrated';
 import { phrasebook } from '../data/phrasebook';
-import { Download, Volume2, Bookmark, ChevronRight, ArrowLeft } from 'lucide-react';
+import { Download, Volume2, ChevronRight, ArrowLeft } from 'lucide-react';
 
 export default function ScriptsPage() {
   const { speak } = useTTS();
-  const addXP = useGameStore(s => s.addXP);
   const [selected, setSelected] = useState<Story | null>(null);
-  const [popoverWord, setPopoverWord] = useState<{ word: string; meaning: string; x: number; y: number } | null>(null);
   const [illusReading, setIllusReading] = useState<IllustratedReading | null>(null);
   const [phraseCat, setPhraseCat] = useState<typeof phrasebook[0] | null>(null);
 
   const stories = getAllStories();
-
-  // Tap on a word to translate
-  const handleWordTap = async (word: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const cleanWord = word.replace(/[.,!?;:'"()«»\s]/g, '').toLowerCase();
-    if (cleanWord.length < 2) return;
-
-    const entry = lookupWord(cleanWord);
-    if (entry) {
-      setPopoverWord({
-        word: entry.f,
-        meaning: entry.c,
-        x: e.clientX,
-        y: e.clientY,
-      });
-      setTimeout(() => setPopoverWord(null), 4000);
-    }
-  };
-
-  // Save word to bank
-  const handleSaveWord = async (word: string) => {
-    const cleanWord = word.replace(/[.,!?;:'"()«»\s]/g, '').toLowerCase();
-    if (cleanWord.length < 2) return;
-    const entry = lookupWord(cleanWord);
-    if (!entry) return;
-
-    const exists = await wordBankDB.savedWords.where('french').equals(entry.f).first();
-    if (exists) return;
-
-    await wordBankDB.savedWords.put({
-      id: Date.now().toString(),
-      french: entry.f,
-      translation: entry.c,
-      notes: entry.p || '',
-      tags: ['阅读'],
-      createdAt: new Date().toISOString(),
-      lastReviewed: new Date().toISOString(),
-      reviewCount: 0,
-      mastered: false,
-    });
-    addXP(3);
-    setPopoverWord(null);
-  };
 
   const openIllustrated = (r: IllustratedReading) => setIllusReading(r);
 
@@ -193,25 +146,6 @@ export default function ScriptsPage() {
           </div>
         ))}
       </div>
-
-      {/* Word popover */}
-      {popoverWord && (
-        <div
-          className="fixed z-50 bg-gray-900 text-white px-4 py-3 rounded-2xl shadow-2xl animate-[bounce-in_0.2s] text-sm"
-          style={{ left: Math.min(popoverWord.x - 80, window.innerWidth - 200), top: popoverWord.y - 80 }}
-        >
-          <div className="flex items-center gap-2">
-            <span className="font-bold">{popoverWord.word}</span>
-            <span className="text-gray-300">{popoverWord.meaning}</span>
-            <button
-              onClick={() => { handleSaveWord(popoverWord.word); setPopoverWord(null); }}
-              className="ml-2 p-1 bg-green-500 rounded-full"
-            >
-              <Bookmark size={12} />
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Tip */}
       <div className="bg-amber-50 rounded-xl p-3 text-xs text-amber-700 text-center">

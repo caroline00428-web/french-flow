@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { lookupWord, wordBankDB } from '../services/wordBank';
-import { Bookmark, Volume2 } from 'lucide-react';
+import { Volume2 } from 'lucide-react';
 
 // ============================================================
 // TappableText — every word clickable for lookup + save
