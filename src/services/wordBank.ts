@@ -583,3 +583,44 @@ export async function importWordPack(file: File): Promise<number> {
   }
   return count;
 }
+
+// ============================================================
+// Online translation — uses Zhipu AI when local dictionary misses
+// ============================================================
+export async function translateOnline(word: string): Promise<DictEntry | null> {
+  const apiKey = localStorage.getItem('frenchflow_api_key');
+  if (!apiKey) return null;
+
+  try {
+    const res = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model: 'glm-4-flash',
+        messages: [{ role: 'user', content: `Translate "${word}" from French to Chinese. Return ONLY a JSON object: {"f":"${word}","c":"中文翻译","p":"法语发音提示"}. No markdown, no explanation.` }],
+        temperature: 0.1,
+        max_tokens: 100,
+      }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const content = data.choices?.[0]?.message?.content || '';
+    // Extract JSON from possible markdown wrapping
+    const json = content.replace(/```json\n?/g, '').replace(/```/g, '').trim();
+    const parsed = JSON.parse(json);
+    if (parsed.c) return { f: word, c: parsed.c, p: parsed.p || '' };
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+// Hybrid lookup: local first, then online
+export async function smartLookup(word: string): Promise<DictEntry | null> {
+  // Try local first
+  const local = lookupWord(word);
+  if (local) return local;
+
+  // Try online
+  return translateOnline(word);
+}

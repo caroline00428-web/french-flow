@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { lookupWord, wordBankDB } from '../services/wordBank';
-import { Volume2 } from 'lucide-react';
+import { smartLookup, wordBankDB } from '../services/wordBank';
+import { Volume2, Loader2 } from 'lucide-react';
 
 // ============================================================
 // TappableText — every word clickable for lookup + save
@@ -14,6 +14,7 @@ interface Props {
 
 export default function TappableText({ text, onSpeak, className = '' }: Props) {
   const [popover, setPopover] = useState<{ word: string; meaning: string; x: number; y: number } | null>(null);
+  const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState<Set<string>>(new Set());
 
   const handleTap = async (rawWord: string, e: React.MouseEvent) => {
@@ -21,15 +22,23 @@ export default function TappableText({ text, onSpeak, className = '' }: Props) {
     const word = rawWord.replace(/[.,!?;:'"()«»\-…]/g, '').toLowerCase();
     if (word.length < 2) return;
 
-    const entry = lookupWord(word);
+    // Show loading
+    setPopover({ word: word, meaning: '查询中...', x: e.clientX, y: e.clientY });
+    setLoading(true);
+
+    // Try local first, then online via Zhipu
+    const entry = await smartLookup(word);
     if (entry) {
       setPopover({ word: entry.f, meaning: entry.c, x: e.clientX, y: e.clientY });
-      setTimeout(() => setPopover(null), 5000);
+    } else {
+      setPopover({ word: word, meaning: '未找到，试试搜索完整单词', x: e.clientX, y: e.clientY });
     }
+    setLoading(false);
+    setTimeout(() => setPopover(null), 6000);
   };
 
   const handleSave = async (word: string) => {
-    const entry = lookupWord(word);
+    const entry = await smartLookup(word);
     if (!entry) return;
     const exists = await wordBankDB.savedWords.where('french').equals(entry.f).first();
     if (!exists) {
@@ -74,13 +83,15 @@ export default function TappableText({ text, onSpeak, className = '' }: Props) {
         >
           <div className="flex items-center gap-2 mb-2">
             <span className="font-bold">{popover.word}</span>
-            {onSpeak && (
+            {loading && <Loader2 size={12} className="animate-spin text-gray-400" />}
+            {onSpeak && !loading && (
               <button onClick={() => onSpeak(popover.word)} className="p-0.5 text-blue-300">
                 <Volume2 size={12} />
               </button>
             )}
           </div>
-          <p className="text-gray-300 text-xs">{popover.meaning}</p>
+          <p className="text-gray-300 text-xs">{loading ? '🔍 联网查询中...' : popover.meaning}</p>
+          {!loading && popover.meaning !== '未找到，试试搜索完整单词' && popover.meaning !== '查询中...' && (
           <button
             onClick={() => handleSave(popover.word)}
             className={`mt-2 w-full py-1 rounded-lg text-xs font-medium ${
@@ -91,6 +102,7 @@ export default function TappableText({ text, onSpeak, className = '' }: Props) {
           >
             {saved.has(popover.word) ? '✅ 已保存' : '📖 加入词库'}
           </button>
+          )}
         </div>
       )}
     </span>
