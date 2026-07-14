@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useGameStore } from '../store/useGameStore';
 import { XP_REWARDS } from '../store/db';
-import { useTTS } from '../hooks/useTTS';
-import { Play, Volume2, BookOpen, ChevronRight, Check, Lightbulb, Mic } from 'lucide-react';
+import { useTTS, speakSlow } from '../hooks/useTTS';
+import TappableText from '../components/TappableText';
+import { Play, Volume2, BookOpen, ChevronRight, Check, Lightbulb, Mic, RefreshCw } from 'lucide-react';
 
 // ============================================================
 // CEFR-graded French reading passages for reading aloud
@@ -311,59 +312,27 @@ export default function Reading() {
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-medium text-gray-400">🇫🇷 全文朗读</span>
-            <button
-              onClick={() => speak(selected.passage.replace(/\n/g, ' '), { rate: 0.8 })}
-              className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-medium"
-            >
-              <Volume2 size={14} /> 听全文
-            </button>
+            <div className="flex gap-1">
+              <button onClick={() => speak(selected.passage.replace(/\n/g, ' '), { rate: 0.85 })} className="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 rounded-lg text-xs font-medium">
+                <Volume2 size={12} /> 常速
+              </button>
+              <button onClick={() => speakSlow(selected.passage.replace(/\n/g, ' '))} className="flex items-center gap-1 px-2 py-1 bg-green-50 text-green-600 rounded-lg text-xs font-medium">
+                <Volume2 size={12} /> 慢速跟读
+              </button>
+            </div>
           </div>
           <p className="text-lg leading-relaxed whitespace-pre-line french-text">
             {selected.passage}
           </p>
         </div>
       ) : (
-        /* Shadowing mode — line by line */
+        /* Shadowing mode — line by line with recording */
         <div className="space-y-2">
           {lines.map((line, i) => (
-            <div key={i} className={`bg-white rounded-xl p-4 shadow-sm border transition-all ${
-              currentLine === i ? 'border-[var(--color-primary)] ring-2 ring-[var(--color-primary)]/10' : 'border-gray-100'
-            }`}>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] text-gray-400">第 {i + 1} 句</span>
-                <button
-                  onClick={() => speak(line.trim(), { rate: 0.75 })}
-                  className="flex items-center gap-1 text-xs text-blue-500"
-                >
-                  <Play size={12} /> 听这句
-                </button>
-              </div>
-              <p
-                className={`text-base leading-relaxed cursor-pointer ${currentLine === i ? 'text-[var(--color-primary-dark)] font-medium' : ''}`}
-                onClick={() => setCurrentLine(i)}
-              >
-                {line.trim()}
-              </p>
-              {currentLine === i && (
-                <div className="mt-2 flex gap-2">
-                  <button
-                    onClick={() => speak(line.trim(), { rate: 0.6 })}
-                    className="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 rounded text-[10px]"
-                  >
-                    <Volume2 size={10} /> 慢速
-                  </button>
-                  <button
-                    onClick={() => speak(line.trim(), { rate: 0.85 })}
-                    className="flex items-center gap-1 px-2 py-1 bg-green-50 text-green-600 rounded text-[10px]"
-                  >
-                    <Mic size={10} /> 跟读这句
-                  </button>
-                </div>
-              )}
-            </div>
+            <ShadowLine key={i} line={line.trim()} index={i} isActive={currentLine === i} onSelect={() => setCurrentLine(i)} speak={speak} />
           ))}
           <p className="text-xs text-[var(--color-text-secondary)] text-center">
-            💡 点击每句话 → 听发音 → 大声跟读 → 模仿语调
+            💡 先听标准发音 → 录下自己的跟读 → 对比找出差异
           </p>
         </div>
       )}
@@ -402,6 +371,60 @@ export default function Reading() {
       {completed.has(selected.id) && (
         <div className="bg-green-50 rounded-xl p-3 text-center animate-[bounce-in_0.4s]">
           <p className="text-sm text-green-600 font-medium">✅ 已标记完成！继续下一篇文章吧</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ShadowLine({ line, index, isActive, onSelect, speak }: { line: string; index: number; isActive: boolean; onSelect: () => void; speak: any }) {
+  const [isRec, setIsRec] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const mrRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+
+  const startRec = async () => {
+    setAudioUrl(null); chunksRef.current = [];
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      mrRef.current = mr;
+      mr.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+      mr.onstop = () => { setAudioUrl(URL.createObjectURL(new Blob(chunksRef.current, { type: 'audio/webm' }))); stream.getTracks().forEach(t => t.stop()); };
+      mr.start(); setIsRec(true);
+      setTimeout(() => { if (mr.state === 'recording') { mr.stop(); setIsRec(false); } }, 8000);
+    } catch { setIsRec(false); }
+  };
+  const stopRec = () => { if (mrRef.current?.state === 'recording') { mrRef.current.stop(); setIsRec(false); } };
+  const clearRec = () => { if (audioUrl) URL.revokeObjectURL(audioUrl); setAudioUrl(null); };
+
+  return (
+    <div className={`bg-white rounded-xl p-4 shadow-sm border transition-all ${isActive ? 'border-[var(--color-primary)] ring-2 ring-[var(--color-primary)]/10' : 'border-gray-100'}`}>
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-[10px] text-gray-400">第 {index + 1} 句</span>
+        <div className="flex gap-1">
+          <button onClick={() => speak(line, { rate: 0.8 })} className="flex items-center gap-1 text-xs text-blue-500 px-1.5 py-0.5 rounded hover:bg-blue-50"><Play size={12} /> 听</button>
+          <button onClick={() => speakSlow(line)} className="flex items-center gap-1 text-xs text-green-500 px-1.5 py-0.5 rounded hover:bg-green-50"><Volume2 size={12} /> 慢速</button>
+        </div>
+      </div>
+      <p className={`text-base leading-relaxed cursor-pointer ${isActive ? 'text-[var(--color-primary-dark)] font-medium' : ''}`} onClick={onSelect}>
+        <TappableText text={line} onSpeak={(w: string) => speak(w, { rate: 0.6 })} />
+      </p>
+      {isActive && (
+        <div className="mt-2 space-y-2">
+          {!audioUrl ? (
+            <button onClick={isRec ? stopRec : startRec} className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium ${isRec ? 'bg-red-50 text-red-500 border border-red-200 recording-pulse' : 'bg-gray-50 text-gray-600 border border-gray-200'}`}>
+              {isRec ? <><div className="w-3 h-3 border-2 border-red-400 border-t-transparent rounded-full animate-spin" /> 录音中...</> : <><Mic size={12} /> 录下我的跟读</>}
+            </button>
+          ) : (
+            <div className="space-y-1.5">
+              <audio src={audioUrl} controls className="w-full h-8" />
+              <div className="flex gap-1">
+                <button onClick={clearRec} className="flex-1 py-1 bg-gray-100 text-gray-500 rounded text-[10px]"><RefreshCw size={10} /> 重录</button>
+                <button onClick={() => speak(line, { rate: 0.6 })} className="flex-1 py-1 bg-blue-50 text-blue-500 rounded text-[10px]"><Volume2 size={10} /> 听标准</button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

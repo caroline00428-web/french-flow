@@ -214,9 +214,12 @@ function PhraseView({ cat, onBack, speak }: { cat: any; onBack: () => void; spea
       <button onClick={onBack} className="flex items-center gap-1 text-sm text-gray-400"><ArrowLeft size={16} /> 返回</button>
       <div className="flex items-center gap-2"><span className="text-2xl">{cat.emoji}</span><h2 className="font-bold text-lg">{cat.nameZh} · {cat.name}</h2></div>
       {cat.sentences.map((s: any, i: number) => (
-        <div key={i} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex justify-between items-start gap-3">
-          <div className="flex-1"><p className="text-base leading-relaxed">{s.french}</p><p className="text-sm text-gray-400 mt-1">{s.chinese}</p></div>
-          <button onClick={() => speak(s.french, { rate: 0.8 })} className="shrink-0 p-2 text-blue-400 hover:bg-blue-50 rounded-lg"><Volume2 size={16} /></button>
+        <div key={i} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+          <div className="flex-1 mb-2"><p className="text-base leading-relaxed">{s.french}</p><p className="text-sm text-gray-400 mt-1">{s.chinese}</p></div>
+          <div className="flex gap-1">
+            <button onClick={() => speak(s.french, { rate: 0.8 })} className="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-500 rounded text-xs"><Volume2 size={12} /> 常速</button>
+            <button onClick={() => speakSlow(s.french)} className="flex items-center gap-1 px-2 py-1 bg-green-50 text-green-600 rounded text-xs"><Volume2 size={12} /> 慢速</button>
+          </div>
         </div>
       ))}
     </div>
