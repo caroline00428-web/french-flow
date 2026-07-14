@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '../store/useGameStore';
 import { hasApiKey } from '../services/gemini';
-import { BookOpen, Settings, Star, TrendingUp, Mic } from 'lucide-react';
+import { BookOpen, Settings, Star, TrendingUp, Mic, MessageSquare } from 'lucide-react';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -53,12 +53,8 @@ export default function Profile() {
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <MenuItem
-          icon={<Settings size={18} className="text-gray-500" />}
-          label="设置"
-          subtitle={hasAI ? 'AI 已连接 ✅' : 'AI 未配置'}
-          onClick={() => navigate('/settings')}
-        />
+        <MenuItem icon={<MessageSquare size={18} className="text-pink-500" />} label="提意见 💬" onClick={() => navigate('/feedback')} subtitle="帮助我们改进" />
+        <MenuItem icon={<Settings size={18} className="text-gray-500" />} label="设置" subtitle={hasAI ? 'AI 已连接 ✅' : 'AI 未配置'} onClick={() => navigate('/settings')} />
       </div>
 
       <p className="text-center text-[10px] text-gray-400">

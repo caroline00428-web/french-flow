@@ -10,7 +10,7 @@ import { travelWords } from '../data/travel';
 import { useTTS } from '../hooks/useTTS';
 import type { VocabWord, VocabCategory, WordProgress } from '../types';
 import { CATEGORY_NAMES } from '../types';
-import { ArrowRight, RotateCcw, Check, Volume2, BookOpen, Brain, Lightbulb } from 'lucide-react';
+import { RotateCcw, Volume2, BookOpen, Brain, Lightbulb } from 'lucide-react';
 
 // Combine all words
 const allWords = [...basicsWords, ...foodWords, ...dailyWords, ...travelWords];
@@ -463,22 +463,23 @@ export default function Vocabulary() {
 
       {/* Result */}
       {showResult && (
-        <div className={`text-center p-4 rounded-xl animate-[bounce-in_0.4s_ease-out] ${
-          (rating ?? 0) >= 3 ? 'bg-green-50' : 'bg-red-50'
+        <div className={`text-center p-5 rounded-xl animate-[bounce-in_0.4s_ease-out] ${
+          (rating ?? 0) >= 3 ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
         }`}>
-          <div className="text-2xl mb-1">{(rating ?? 0) >= 3 ? '✅' : '❌'}</div>
-          <p className={`font-semibold ${(rating ?? 0) >= 3 ? 'text-green-600' : 'text-red-500'}`}>
-            {(rating ?? 0) >= 4 ? '太棒了!' : (rating ?? 0) >= 3 ? '继续加油!' : '下次会更好!'}
-          </p>
+          <div className="text-2xl mb-2">{(rating ?? 0) >= 3 ? '✅' : '❌'}</div>
+          <p className="text-lg font-bold">{currentWord.french}</p>
+          <p className="text-base font-semibold text-[var(--color-primary-dark)] mt-1">{currentWord.english}</p>
+          {currentWord.exampleSentence && (
+            <div className="mt-3 p-3 bg-white/60 rounded-xl text-left">
+              <p className="text-sm">{currentWord.exampleSentence}</p>
+              <p className="text-xs text-gray-400 mt-1">{currentWord.exampleTranslation}</p>
+            </div>
+          )}
           <button
             onClick={handleNext}
-            className="mt-3 inline-flex items-center gap-1.5 px-5 py-2.5 bg-[var(--color-primary)] text-white font-bold rounded-xl"
+            className="mt-4 w-full py-3 bg-[var(--color-primary)] text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2"
           >
-            {currentIndex < words.length - 1 ? (
-              <>下一词 <ArrowRight size={16} /></>
-            ) : (
-              <>完成 <Check size={16} /></>
-            )}
+            {currentIndex < words.length - 1 ? '下一词 →' : '✅ 完成本轮'}
           </button>
         </div>
       )}

@@ -1,6 +1,7 @@
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { Search, BookOpen, LayoutDashboard, User } from 'lucide-react';
 import TutorFab from './TutorFab';
+import { VERSION } from '../config';
 
 const navItems = [
   { to: '/', icon: Search, label: '查词', exact: true },
@@ -21,7 +22,7 @@ export default function Layout() {
             <span className="text-xl">🇫🇷</span>
             <span className="text-base font-bold text-[var(--color-primary)]">FrenchFlow</span>
           </NavLink>
-          <span className="text-[10px] text-gray-400">随身法语助手</span>
+          <span className="text-[10px] text-gray-400">v{VERSION}</span>
         </div>
       </header>
 
