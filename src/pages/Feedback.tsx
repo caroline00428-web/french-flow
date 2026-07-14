@@ -1,25 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Check, Clock, Mail, Copy } from 'lucide-react';
+import { Clock, Mail, Copy } from 'lucide-react';
 
 export default function Feedback() {
   const [text, setText] = useState('');
-  const [sent, setSent] = useState(false);
 
   const EMAIL = 'caroline00428@gmail.com';
   const subject = 'FrenchFlow 意见反馈';
-  const mailtoUrl = `mailto:${EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
-
-  // Save locally too
-  const handleSaveLocal = () => {
-    if (!text.trim()) return;
-    try {
-      const saved = JSON.parse(localStorage.getItem('ff_feedback') || '[]');
-      saved.unshift({ text: text.trim(), date: new Date().toISOString(), page: window.location.pathname });
-      localStorage.setItem('ff_feedback', JSON.stringify(saved.slice(0, 50)));
-      setSent(true);
-      setTimeout(() => setSent(false), 3000);
-    } catch {}
-  };
 
   return (
     <div className="space-y-4">
@@ -30,9 +16,19 @@ export default function Feedback() {
       <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-5 border border-blue-100">
         <div className="flex items-center gap-2 mb-3">
           <Mail size={20} className="text-blue-500" />
-          <span className="font-semibold text-blue-700">发送邮件给开发者</span>
+          <span className="font-semibold text-blue-700">发邮件给开发者</span>
         </div>
-        <p className="text-sm text-blue-600 mb-4">caroline00428@gmail.com</p>
+
+        {/* Email copy */}
+        <div className="flex items-center justify-between p-3 bg-white rounded-xl mb-4">
+          <span className="text-sm font-bold text-gray-700">{EMAIL}</span>
+          <button
+            onClick={() => { navigator.clipboard.writeText(EMAIL); alert('邮箱已复制！'); }}
+            className="flex items-center gap-1 px-3 py-1.5 bg-blue-500 text-white rounded-lg text-xs font-bold"
+          >
+            <Copy size={12} /> 复制邮箱
+          </button>
+        </div>
 
         {/* Text input */}
         <textarea
@@ -42,21 +38,24 @@ export default function Feedback() {
           className="w-full p-3 rounded-xl border border-blue-200 text-sm min-h-[100px] outline-none focus:border-blue-400 resize-none bg-white"
         />
         <div className="flex gap-2 mt-3">
+          {/* Simple mailto without body — won't crash */}
           <a
-            href={text ? mailtoUrl : `mailto:${EMAIL}?subject=${encodeURIComponent(subject)}`}
+            href={`mailto:${EMAIL}?subject=${encodeURIComponent(subject)}`}
             className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-500 text-white font-bold rounded-xl text-sm hover:bg-blue-600"
           >
-            <Mail size={16} /> 打开邮箱发送
+            <Mail size={16} /> 打开邮箱
           </a>
           <button
-            onClick={handleSaveLocal}
+            onClick={() => { navigator.clipboard.writeText(text); alert('内容已复制！粘贴到邮件中即可'); }}
             disabled={!text.trim()}
-            className={`px-4 py-3 rounded-xl text-sm font-medium ${
-              sent ? 'bg-green-100 text-green-600' : 'bg-white text-gray-600 border border-gray-200 disabled:opacity-40'
-            }`}
+            className="px-4 py-3 bg-white text-gray-600 rounded-xl text-sm font-medium border border-gray-200 disabled:opacity-40"
           >
-            {sent ? <Check size={16} /> : '本地保存'}
+            <Copy size={16} /> 复制内容
           </button>
+        </div>
+        <p className="text-[10px] text-blue-400 mt-2">
+          ① 复制邮箱地址 → ② 点击「打开邮箱」→ ③ 粘贴邮箱 → ④ 粘贴内容到邮件正文。
+        </p>
         </div>
         <p className="text-[10px] text-blue-400 mt-2">
           点击「打开邮箱发送」会自动打开你电脑的默认邮件程序，附上你写的内容。
