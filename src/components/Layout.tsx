@@ -1,7 +1,6 @@
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { Search, BookOpen, LayoutDashboard, User } from 'lucide-react';
 import TutorFab from './TutorFab';
-import BannerAd from './BannerAd';
 
 const navItems = [
   { to: '/', icon: Search, label: '查词', exact: true },
@@ -14,7 +13,7 @@ export default function Layout() {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-surface-secondary pb-[120px]">
+    <div className="min-h-screen bg-surface-secondary pb-20">
       {/* Minimal top bar */}
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-lg border-b border-gray-50 px-4 py-2">
         <div className="max-w-lg mx-auto flex items-center justify-between">
@@ -33,11 +32,6 @@ export default function Layout() {
 
       {/* AI Tutor floating button */}
       <TutorFab />
-
-      {/* Banner Ad */}
-      <div className="fixed bottom-[68px] left-0 right-0 z-30">
-        <BannerAd compact />
-      </div>
 
       {/* Bottom navigation — 4 tabs */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-gray-100">
