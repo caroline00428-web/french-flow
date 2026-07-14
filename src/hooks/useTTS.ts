@@ -36,6 +36,44 @@ function getBestFrenchVoice(): SpeechSynthesisVoice | null {
   return fr || null;
 }
 
+// Slow, clear speech — breaks sentences into phrases
+export function speakSlow(text: string): void {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+
+  // Split into phrases
+  const phrases = text.split(/([,.;:!?])/).reduce((acc: string[], part: string) => {
+    if (['.', ',', ';', ':', '!', '?'].includes(part.trim()) && acc.length > 0) {
+      acc[acc.length - 1] += part;
+    } else if (part.trim()) {
+      acc.push(part.trim());
+    }
+    return acc;
+  }, []);
+
+  let idx = 0;
+  const speakNext = () => {
+    if (idx >= phrases.length) return;
+    const u = new SpeechSynthesisUtterance(phrases[idx]);
+    u.lang = 'fr-FR'; u.rate = 0.55; u.pitch = 1.0;
+    const saved = getSavedVoiceName();
+    if (saved) { const v = window.speechSynthesis.getVoices().find(vo => vo.name === saved); if (v) u.voice = v; }
+    if (!u.voice) {
+      // Fallback: pick best French voice
+      const voices = window.speechSynthesis.getVoices();
+      const preferred = ['Google français', 'Thomas', 'Amélie', 'Microsoft Hortense'];
+      for (const name of preferred) {
+        const v = voices.find(vo => vo.name.includes(name) && vo.lang.startsWith('fr'));
+        if (v) { u.voice = v; break; }
+      }
+      if (!u.voice) { const v = voices.find(vo => vo.lang.startsWith('fr')); if (v) u.voice = v; }
+    }
+    u.onend = () => { idx++; setTimeout(speakNext, 250); };
+    window.speechSynthesis.speak(u);
+  };
+  speakNext();
+}
+
 // Get all French voices
 export function getFrenchVoices(): SpeechSynthesisVoice[] {
   return window.speechSynthesis.getVoices().filter(v => v.lang.startsWith('fr'));

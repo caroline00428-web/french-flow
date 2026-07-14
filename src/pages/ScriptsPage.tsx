@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useGameStore } from '../store/useGameStore';
 import { wordBankDB, lookupWord } from '../services/wordBank';
 import { useTTS } from '../hooks/useTTS';
+import { speakSlow } from '../hooks/useTTS';
+import TappableText from '../components/TappableText';
 import { getAllStories, downloadStoryAsHTML, downloadAllStoriesAsBook, type Story } from '../data/stories';
 import { illustratedReadings, type IllustratedReading } from '../data/illustrated';
 import { phrasebook } from '../data/phrasebook';
@@ -160,20 +162,9 @@ export default function ScriptsPage() {
               </span>
             )}
 
-            {/* French text — each word is tappable */}
-            <p className="text-lg mb-2 leading-relaxed cursor-default">
-              {p.french.split(/(\s+)/).map((token, j) => {
-                if (token.trim() === '') return token;
-                return (
-                  <span
-                    key={j}
-                    onClick={(e) => handleWordTap(token, e)}
-                    className="hover:bg-yellow-100 hover:rounded px-0.5 cursor-pointer transition-colors"
-                  >
-                    {token}
-                  </span>
-                );
-              })}
+            {/* French text with tap-to-lookup */}
+            <p className="text-lg mb-2 leading-relaxed">
+              <TappableText text={p.french} onSpeak={(w) => speak(w, { rate: 0.6 })} />
             </p>
 
             {/* Chinese translation */}
@@ -190,13 +181,13 @@ export default function ScriptsPage() {
               </div>
             )}
 
-            {/* Listen + Save row */}
+            {/* Listen buttons */}
             <div className="flex gap-2 mt-2">
-              <button
-                onClick={() => speak(p.french, { rate: 0.8 })}
-                className="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-500 rounded-lg text-xs"
-              >
-                <Volume2 size={12} /> 听朗读
+              <button onClick={() => speak(p.french, { rate: 0.8 })} className="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-500 rounded-lg text-xs">
+                <Volume2 size={12} /> 常速
+              </button>
+              <button onClick={() => speakSlow(p.french)} className="flex items-center gap-1 px-2 py-1 bg-green-50 text-green-600 rounded-lg text-xs">
+                <Volume2 size={12} /> 慢速跟读
               </button>
             </div>
           </div>
