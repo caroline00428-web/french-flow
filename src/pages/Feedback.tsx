@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Send, Check, Clock, Mail, Copy } from 'lucide-react';
+import { Check, Clock, Mail, Copy } from 'lucide-react';
 
 export default function Feedback() {
   const [text, setText] = useState('');
