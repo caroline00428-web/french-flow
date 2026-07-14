@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { wordBankDB } from '../services/wordBank';
 import { useTTS, speakSlow } from '../hooks/useTTS';
 import TappableText from '../components/TappableText';
 import { getAllStories, downloadStoryAsHTML, downloadAllStoriesAsBook, type Story } from '../data/stories';
