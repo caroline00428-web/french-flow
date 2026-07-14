@@ -4,6 +4,7 @@ import { XP_REWARDS } from '../store/db';
 import { pronunciationExercises } from '../data/pronunciation';
 import { Mic, Volume2, ArrowRight, RotateCcw, Check, SkipForward, AlertCircle, Keyboard, Play, RefreshCw, Ear } from 'lucide-react';
 import { useTTS } from '../hooks/useTTS';
+import { transcribeHybrid } from '../services/speechToText';
 
 // Audio recorder — records real audio for self-listen feedback
 function useAudioRecorder() {
@@ -175,6 +176,8 @@ export default function Pronunciation() {
   const [showTextInput, setShowTextInput] = useState(false);
   const [textInput, setTextInput] = useState('');
   const [played, setPlayed] = useState(false);
+  const [zhipuText, setZhipuText] = useState<string | null>(null);
+  const [sttSource, setSttSource] = useState<'zhipu' | 'browser' | 'none'>('none');
 
   const current = pronunciationExercises[currentIndex];
 
@@ -196,10 +199,37 @@ export default function Pronunciation() {
     setShowTextInput(false);
     setTextInput('');
     setPlayed(false);
+    setZhipuText(null);
+    setSttSource('none');
     clearError();
     clearAudio();
     reset();
   }, [currentIndex]);
+
+  // Send recorded audio to Zhipu for accurate transcription
+  useEffect(() => {
+    if (!audioUrl) return;
+    (async () => {
+      try {
+        const response = await fetch(audioUrl);
+        const blob = await response.blob();
+        const result = await transcribeHybrid(blob, transcript);
+        if (result.text) {
+          setZhipuText(result.text);
+          setSttSource(result.source);
+          if (!transcript) {
+            // If browser STT failed, use Zhipu result directly
+            const comp = comparePronunciation(current.french, result.text);
+            setResult(comp);
+            setHasRecorded(true);
+            setSessionScores(s => [...s, comp.score]);
+            if (comp.score >= 60) addXP(XP_REWARDS.pronunciationGood);
+            if (comp.score >= 90) addGems(1);
+          }
+        }
+      } catch {}
+    })();
+  }, [audioUrl]);
 
   const handleRecord = () => {
     if (isListening) {
@@ -463,11 +493,22 @@ export default function Pronunciation() {
         </div>
       )}
 
-      {/* Transcript */}
+      {/* Transcript — browser STT */}
       {transcript && (
         <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 animate-[slide-up_0.3s_ease-out]">
-          <p className="text-xs text-[var(--color-text-secondary)] mb-1">识别结果:</p>
+          <p className="text-xs text-[var(--color-text-secondary)] mb-1">浏览器识别:</p>
           <p className="text-lg font-medium">{transcript}</p>
+        </div>
+      )}
+
+      {/* Transcript — Zhipu AI STT */}
+      {zhipuText && zhipuText !== transcript && (
+        <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-4 shadow-sm border border-purple-100 animate-[slide-up_0.3s_ease-out]">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs text-purple-500 font-medium">🤖 AI 语音识别</span>
+            <span className="text-[10px] bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded-full">智谱</span>
+          </div>
+          <p className="text-lg font-medium text-purple-700">{zhipuText}</p>
         </div>
       )}
 
