@@ -105,4 +105,7 @@ export const XP_REWARDS = {
   perfectLesson: 15, // bonus
   dailyGoalMet: 20, // bonus
   streakBonus: 5, // extra per streak day
+  quizCorrect: 10,       // quiz battle: correct answer
+  quizCorrectChloe: 5,   // quiz battle: correct Chloé's mistake
+  quizWin: 20,            // quiz battle: win bonus
 } as const;

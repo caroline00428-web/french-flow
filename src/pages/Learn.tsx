@@ -18,6 +18,14 @@ interface CourseSection {
 
 const courses: CourseSection[] = [
   {
+    title: '对战挑战',
+    subtitle: '和AI同学Chloé比拼法语知识',
+    icon: '⚔️',
+    lessons: [
+      { name: '对战 Chloé', desc: '10题PK · 纠正她额外加分 · 无需AI', to: '/quiz-battle' },
+    ],
+  },
+  {
     title: 'A0 入门基础',
     subtitle: '问候、数字、颜色、基础词汇',
     icon: '🌱',

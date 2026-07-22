@@ -27,6 +27,7 @@ import Tutor from './pages/Tutor';
 import Achievements from './pages/Achievements';
 import Settings from './pages/Settings';
 import Dashboard from './pages/Dashboard';
+import QuizBattle from './pages/QuizBattle';
 
 export default function App() {
   const initialize = useGameStore(s => s.initialize);
@@ -73,6 +74,7 @@ export default function App() {
           <Route path="/achievements" element={<Achievements />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/quiz-battle" element={<QuizBattle />} />
         </Route>
       </Routes>
     </BrowserRouter>

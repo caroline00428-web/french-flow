@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '../store/useGameStore';
 import { wordBankDB } from '../services/wordBank';
 import { doCheckIn, hasCheckedInToday, getCheckInWeek } from '../services/checkinService';
-import { BookOpen, BookText, Search, Mic, Gift, Film } from 'lucide-react';
+import { BookOpen, BookText, Search, Mic, Gift, Film, Swords } from 'lucide-react';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -110,6 +110,21 @@ export default function Dashboard() {
       </div>
 
       {/* Study actions */}
+      {/* Quiz Battle — featured */}
+      <button
+        onClick={() => navigate('/quiz-battle')}
+        className="w-full bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-4 shadow-sm border border-purple-100 text-left hover:border-purple-300 transition-colors group"
+      >
+        <div className="flex items-center gap-3">
+          <div className="text-3xl">👧</div>
+          <div className="flex-1">
+            <div className="font-semibold text-sm text-purple-700">对战 Chloé</div>
+            <div className="text-xs text-purple-500 mt-0.5">和AI同学PK法语·10题对战·纠正她加分</div>
+          </div>
+          <Swords size={20} className="text-purple-400" />
+        </div>
+      </button>
+
       <div className="grid grid-cols-2 gap-3">
         <button onClick={() => navigate('/vocabulary')} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-left hover:border-indigo-300 transition-colors group">
           <BookOpen size={22} className="text-indigo-500 mb-2" />
