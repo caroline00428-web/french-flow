@@ -7,6 +7,8 @@ import {
   pickBattleQuestions,
   getChloeAnswer,
   chloeReactions,
+  randomReaction,
+  addError,
   type QuizQuestion,
   type ChloeAnswer,
 } from '../data/quizBattles';
@@ -44,10 +46,6 @@ export default function QuizBattle() {
   const [totalGems, setTotalGems] = useState(0);
   const [userWon, setUserWon] = useState(false);
 
-  // Pick random reaction
-  const randomReaction = (pool: string[]) => pool[Math.floor(Math.random() * pool.length)];
-
-  // Start battle
   const handleStart = () => {
     const picked = pickBattleQuestions(10);
     setQuestions(picked);
@@ -73,6 +71,9 @@ export default function QuizBattle() {
       const xp = XP_REWARDS.quizCorrect || 10;
       addXP(xp);
       setTotalXP(t => t + xp);
+    } else {
+      // Track error
+      addError(currentQuestion.id, idx);
     }
     setPhase('userResult');
   };
@@ -81,13 +82,11 @@ export default function QuizBattle() {
   const handleUserResultNext = () => {
     if (!currentQuestion) return;
     setPhase('chloeThinking');
-    // Generate Chloé's answer
     const chloeAns = getChloeAnswer(currentQuestion.id, round);
     setChloeData(chloeAns);
     const pool = chloeAns.isCorrect ? chloeReactions.correct : chloeReactions.wrong;
     setChloeReaction(randomReaction(pool));
     setCorrectionDone(false);
-    // Auto-advance after 1.5s
     setTimeout(() => setPhase('chloeResult'), 1500);
   };
 
@@ -96,11 +95,12 @@ export default function QuizBattle() {
     if (!chloeData) return;
     if (chloeData.isCorrect) {
       setChloeScore(s => s + 10);
-      // If chloe was correct, move to next round
-      advanceRound();
-    } else {
-      // If chloe was wrong, user gets to correct her
+    }
+    if (!chloeData.isCorrect) {
+      // Chloé was wrong — user gets to correct her
       setPhase('chloeWrong');
+    } else {
+      advanceRound();
     }
   };
 
@@ -108,8 +108,8 @@ export default function QuizBattle() {
   const handleCorrectChloe = (idx: number) => {
     if (!currentQuestion || correctionDone) return;
     setCorrectionDone(true);
+    setUserAnswer(idx);
     if (idx === currentQuestion.correctIndex) {
-      // Correctly corrected!
       setUserScore(s => s + 5);
       const xp = XP_REWARDS.quizCorrectChloe || 5;
       addXP(xp);
@@ -119,18 +119,13 @@ export default function QuizBattle() {
     setPhase('chloeCorrected');
   };
 
-  // Chloé corrected — advance to next round
+  // Advance to next round or end
   const handleChloeCorrectedNext = () => {
-    if (chloeData && chloeData.isCorrect) {
-      setChloeScore(s => s + 10);
-    }
     advanceRound();
   };
 
-  // Advance to next round or end
   const advanceRound = () => {
     if (round >= 9) {
-      // End game
       const won = userScore > chloeScore;
       setUserWon(won);
       if (won) {
@@ -154,11 +149,6 @@ export default function QuizBattle() {
     }
   };
 
-  // Reset for replay
-  const handleReplay = () => {
-    handleStart();
-  };
-
   // --- RENDER HELPERS ---
 
   const renderScoreBar = () => (
@@ -167,8 +157,17 @@ export default function QuizBattle() {
         <span className="text-lg">😎</span>
         <span className="font-bold text-sm text-[var(--color-primary)]">{userScore}</span>
       </div>
-      <div className="text-xs text-gray-400 font-medium">
-        {round + 1}/10
+      <div className="flex items-center gap-1">
+        <span className="text-[10px] text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">{round + 1}/10</span>
+        {currentQuestion && (
+          <span className={`text-[10px] px-2 py-0.5 rounded-full ${
+            currentQuestion.level === 'A1' ? 'bg-green-50 text-green-600' :
+            currentQuestion.level === 'A2' ? 'bg-blue-50 text-blue-600' :
+            'bg-purple-50 text-purple-600'
+          }`}>
+            {currentQuestion.type === 'grammar' ? '语法' : currentQuestion.type === 'vocab' ? '词汇' : '阅读'}
+          </span>
+        )}
       </div>
       <div className="flex items-center gap-2">
         <span className="font-bold text-sm text-purple-500">{chloeScore}</span>
@@ -194,7 +193,7 @@ export default function QuizBattle() {
           } else if (selectedIndex === i && i !== correctIndex) {
             style = 'bg-red-50 border-red-400 text-red-700';
           } else if (markedWrong === i) {
-            style = 'bg-red-50 border-red-300 text-red-500 opacity-60 line-through';
+            style = 'bg-red-50 border-red-300 text-red-500 opacity-50 line-through decoration-1';
           } else {
             style = 'bg-gray-50 border-gray-100 text-gray-400';
           }
@@ -210,42 +209,45 @@ export default function QuizBattle() {
           >
             {opt}
             {disabled && i === correctIndex && <span className="float-right">✅</span>}
-            {disabled && selectedIndex === i && i !== correctIndex && <span className="float-right">❌</span>}
+            {disabled && selectedIndex === i && i !== correctIndex && !(markedWrong === i) && <span className="float-right">❌</span>}
           </button>
         );
       })}
     </div>
   );
 
-  // --- PHASE RENDERS ---
+  const typeLabel = (q: QuizQuestion) => {
+    const map = { grammar: '语法选择', vocab: '词汇辨析', reading: '阅读理解' };
+    return map[q.type];
+  };
 
+  // --- START ---
   if (phase === 'start') {
     return (
       <div className="space-y-5 animate-[bounce-in_0.3s_ease-out]">
-        <h1 className="text-xl font-bold text-center">对战做题 ⚔️</h1>
+        <h1 className="text-xl font-bold text-center">DELF 对战 ⚔️</h1>
 
-        {/* Chloe intro card */}
         <div className="bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl p-6 shadow-sm border border-pink-100 text-center">
           <div className="text-5xl mb-3">👧</div>
           <h2 className="font-bold text-lg text-purple-700 mb-1">Chloé</h2>
           <p className="text-sm text-purple-600 mb-4">
-            "Salut! 我是你的法语同学～<br />来PK吧，看谁法语更厉害！"
+            "Salut! 来PK法语吧！<br />DELF 真题风格，看谁厉害！"
           </p>
-          <div className="flex justify-center gap-4 text-xs text-purple-500">
-            <span>📝 10道题</span>
-            <span>⭐ 每题10分</span>
-            <span>✏️ 纠正+5分</span>
+          <div className="flex justify-center gap-4 text-xs text-purple-500 flex-wrap">
+            <span>📝 语法选择</span>
+            <span>📖 词汇辨析</span>
+            <span>📚 阅读理解</span>
           </div>
         </div>
 
-        {/* Rules */}
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-2">
           <h3 className="font-semibold text-sm">📋 规则</h3>
           <div className="text-xs text-gray-500 space-y-1.5">
-            <p>1️⃣ 轮流答题，你和Chloé各答10题</p>
-            <p>2️⃣ Chloé有时会犯错，你帮她纠正 +5分</p>
-            <p>3️⃣ 最后比分高的人获胜 🏆</p>
-            <p className="text-purple-500">💡 Chloé的答案都是预写的，全程无需AI～</p>
+            <p>1️⃣ 轮流答 DELF 真题风格的选择题</p>
+            <p>2️⃣ Chloé 答对时会分享知识点</p>
+            <p>3️⃣ Chloé 答错时你来纠正 +5分</p>
+            <p>4️⃣ 你的错题会自动记录到错题本 📒</p>
+            <p className="text-purple-500">💡 A1/A2/B1 混合，题型对标 DELF 考试</p>
           </div>
         </div>
 
@@ -264,37 +266,55 @@ export default function QuizBattle() {
     <div className="space-y-4">
       <h1 className="text-lg font-bold text-center">对战 Chloé ⚔️</h1>
 
-      {/* Score bar */}
       {renderScoreBar()}
 
       {/* Progress */}
       <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
         <div
           className="h-full bg-gradient-to-r from-purple-400 to-pink-400 rounded-full transition-all duration-500"
-          style={{ width: `${(round / 10) * 100}%` }}
+          style={{ width: `${((round + (phase === 'end' ? 1 : 0)) / 10) * 100}%` }}
         />
       </div>
 
-      {/* Question card */}
-      {currentQuestion && (
+      {currentQuestion && phase !== 'end' && (
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          {/* French question */}
+          {/* Header */}
           <div className="flex items-start justify-between mb-3">
             <div className="flex-1">
-              <span className="text-[10px] text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">
-                {currentQuestion.level} · {currentQuestion.category === 'vocab' ? '词汇' : currentQuestion.category === 'grammar' ? '语法' : '表达'}
-              </span>
-              <p className="text-lg font-medium mt-2 leading-relaxed">{currentQuestion.french}</p>
+              <div className="flex items-center gap-2 mb-2">
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                  currentQuestion.level === 'A1' ? 'bg-green-100 text-green-700' :
+                  currentQuestion.level === 'A2' ? 'bg-blue-100 text-blue-700' :
+                  'bg-purple-100 text-purple-700'
+                }`}>
+                  DELF {currentQuestion.level}
+                </span>
+                <span className="text-[10px] text-gray-400">{typeLabel(currentQuestion)}</span>
+              </div>
+              {/* French text */}
+              {currentQuestion.type === 'reading' ? (
+                <div className="bg-amber-50 rounded-xl p-3 mb-3 border border-amber-100">
+                  <p className="text-sm leading-relaxed whitespace-pre-line">{currentQuestion.french}</p>
+                </div>
+              ) : (
+                <p className="text-base font-medium leading-relaxed mb-1">{currentQuestion.french}</p>
+              )}
+              <p className="text-sm text-gray-500">{currentQuestion.question}</p>
             </div>
             <button
-              onClick={() => speak(currentQuestion.french, { rate: 0.8 })}
+              onClick={() => speak(
+                currentQuestion.type === 'reading'
+                  ? currentQuestion.french.slice(0, 80)
+                  : currentQuestion.french,
+                { rate: 0.8 }
+              )}
               className="p-2 text-blue-400 hover:bg-blue-50 rounded-lg shrink-0"
             >
               <Volume2 size={18} />
             </button>
           </div>
 
-          {/* Options — depends on phase */}
+          {/* Options */}
           {phase === 'userTurn' && (
             renderOptions(currentQuestion.options, currentQuestion.correctIndex, handleUserAnswer, false)
           )}
@@ -303,7 +323,9 @@ export default function QuizBattle() {
             <>
               {renderOptions(currentQuestion.options, currentQuestion.correctIndex, () => {}, true, userAnswer)}
               <div className={`mt-3 p-3 rounded-xl text-sm ${userAnswer === currentQuestion.correctIndex ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                <p className="font-semibold mb-1">{userAnswer === currentQuestion.correctIndex ? '✅ 正确！ +10分' : '❌ 不对哦'}</p>
+                <p className="font-semibold mb-1">
+                  {userAnswer === currentQuestion.correctIndex ? '✅ 正确！ +10分' : '❌ 不对哦（已加入错题本 📒）'}
+                </p>
                 <p className="text-xs opacity-80">{currentQuestion.explanation}</p>
               </div>
               <button
@@ -339,9 +361,17 @@ export default function QuizBattle() {
               <div className={`mt-3 p-3 rounded-xl text-sm ${chloeData.isCorrect ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-lg">👧</span>
-                  <span className="font-semibold">{chloeData.isCorrect ? 'Chloé 答对了！ +10分' : 'Chloé 答错了...'}</span>
+                  <span className="font-semibold">
+                    {chloeData.isCorrect ? 'Chloé 答对了！ +10分' : 'Chloé 答错了...'}
+                  </span>
                 </div>
-                <p className="text-xs opacity-80">💬 "{chloeReaction}"</p>
+                <p className="text-xs opacity-80 mb-1">💬 "{chloeReaction}"</p>
+                {/* Chloé shares knowledge when correct */}
+                {chloeData.isCorrect && currentQuestion.chloeTip && (
+                  <div className="mt-2 pt-2 border-t border-green-200">
+                    <p className="text-xs opacity-80">📝 <span className="font-medium">Chloé 的知识点：</span>{currentQuestion.chloeTip}</p>
+                  </div>
+                )}
               </div>
               <button
                 onClick={handleChloeResultNext}
@@ -382,7 +412,7 @@ export default function QuizBattle() {
               )}
               <div className="mt-3 p-3 rounded-xl text-sm bg-green-50 text-green-700">
                 <p className="font-semibold mb-1">
-                  {userAnswer === currentQuestion.correctIndex || correctionDone
+                  {userAnswer === currentQuestion.correctIndex && correctionDone
                     ? '✅ 纠正成功！ +5分'
                     : '正确答案如下'}
                 </p>
@@ -406,14 +436,14 @@ export default function QuizBattle() {
           <div className="text-center">
             <div className="text-5xl mb-2">{userWon ? '🏆' : '🤝'}</div>
             <h2 className="text-xl font-bold">{userWon ? '你赢了！' : userScore === chloeScore ? '平局！' : '差一点就赢了！'}</h2>
+            <p className="text-xs text-gray-400 mt-1">错题已自动记录，到错题本复习 📒</p>
           </div>
 
-          {/* Score comparison */}
           <div className="flex items-center justify-center gap-6 py-3">
             <div className="text-center">
               <div className="text-3xl mb-1">😎</div>
               <div className="text-2xl font-bold text-[var(--color-primary)]">{userScore}</div>
-              <div className="text-xs text-gray-400">答对 {userCorrect}/10</div>
+              <div className="text-xs text-gray-400">对 {userCorrect}/10</div>
             </div>
             <div className="text-2xl text-gray-300 font-bold">vs</div>
             <div className="text-center">
@@ -423,7 +453,6 @@ export default function QuizBattle() {
             </div>
           </div>
 
-          {/* XP summary */}
           <div className="bg-amber-50 rounded-xl p-4 space-y-1.5">
             <div className="flex items-center gap-2 text-sm">
               <Zap size={14} className="text-amber-500" />
@@ -439,10 +468,9 @@ export default function QuizBattle() {
             )}
           </div>
 
-          {/* Actions */}
           <div className="flex gap-3">
             <button
-              onClick={handleReplay}
+              onClick={handleStart}
               className="flex-1 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 shadow-md hover:shadow-lg active:scale-[0.98] transition-all"
             >
               <RotateCcw size={16} />
