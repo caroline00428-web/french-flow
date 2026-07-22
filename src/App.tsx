@@ -28,6 +28,7 @@ import Achievements from './pages/Achievements';
 import Settings from './pages/Settings';
 import Dashboard from './pages/Dashboard';
 import QuizBattle from './pages/QuizBattle';
+import Dialogue from './pages/Dialogue';
 
 export default function App() {
   const initialize = useGameStore(s => s.initialize);
@@ -75,6 +76,7 @@ export default function App() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/quiz-battle" element={<QuizBattle />} />
+          <Route path="/dialogue" element={<Dialogue />} />
         </Route>
       </Routes>
     </BrowserRouter>
