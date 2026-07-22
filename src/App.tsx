@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useGameStore } from './store/useGameStore';
+import { initVoices } from './hooks/useTTS';
 import Layout from './components/Layout';
 
 // Core 4 tabs
@@ -31,7 +32,7 @@ export default function App() {
   const initialize = useGameStore(s => s.initialize);
   const isLoaded = useGameStore(s => s.isLoaded);
 
-  useEffect(() => { initialize(); }, [initialize]);
+  useEffect(() => { initialize(); initVoices(); }, [initialize]);
 
   if (!isLoaded) {
     return (
