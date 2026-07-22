@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useRef } from 'react';
 
 // ============================================================
 // TTS with French voice selection for natural pronunciation
@@ -11,29 +11,31 @@ interface TTSState {
   error: string | null;
 }
 
-// Get best available French voice
-function getBestFrenchVoice(): SpeechSynthesisVoice | null {
+// --- Cached voice lookup (refreshed via initVoices) ---
+let cachedFrenchVoice: SpeechSynthesisVoice | null = null;
+let voiceCacheTime = 0;
+
+function getCachedFrenchVoice(): SpeechSynthesisVoice | null {
+  // Refresh cache every 30 seconds (voices can change if user changes system settings)
+  if (cachedFrenchVoice && Date.now() - voiceCacheTime < 30000) return cachedFrenchVoice;
+
   const voices = window.speechSynthesis.getVoices();
   if (voices.length === 0) return null;
 
-  // Priority order for natural French voices
   const preferred = [
-    'Google français',        // Chrome — most natural
-    'French France',          // Chrome alt
-    'Thomas',                 // macOS — very natural
-    'Amélie',                 // macOS — female voice
-    'Microsoft Hortense',     // Windows — French female
-    'Microsoft Paul',         // Windows — French male
+    'Google français', 'French France',       // Chrome
+    'Thomas', 'Amélie',                        // macOS
+    'Microsoft Hortense', 'Microsoft Paul',    // Windows
   ];
 
   for (const name of preferred) {
     const v = voices.find(v => v.name.includes(name) && v.lang.startsWith('fr'));
-    if (v) return v;
+    if (v) { cachedFrenchVoice = v; voiceCacheTime = Date.now(); return v; }
   }
 
-  // Any fr-FR voice as fallback
   const fr = voices.find(v => v.lang.startsWith('fr-FR')) || voices.find(v => v.lang.startsWith('fr'));
-  return fr || null;
+  if (fr) { cachedFrenchVoice = fr; voiceCacheTime = Date.now(); }
+  return cachedFrenchVoice;
 }
 
 // Slow, clear speech — breaks sentences into phrases
@@ -41,7 +43,6 @@ export function speakSlow(text: string): void {
   if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
 
-  // Split into phrases
   const phrases = text.split(/([,.;:!?])/).reduce((acc: string[], part: string) => {
     if (['.', ',', ';', ':', '!', '?'].includes(part.trim()) && acc.length > 0) {
       acc[acc.length - 1] += part;
@@ -51,24 +52,18 @@ export function speakSlow(text: string): void {
     return acc;
   }, []);
 
+  // Lookup voice ONCE for the entire chain
+  const voice = getCachedFrenchVoice();
+  const saved = getSavedVoiceName();
+  const savedVoice = saved ? window.speechSynthesis.getVoices().find(v => v.name === saved) : null;
+
   let idx = 0;
   const speakNext = () => {
     if (idx >= phrases.length) return;
     const u = new SpeechSynthesisUtterance(phrases[idx]);
     u.lang = 'fr-FR'; u.rate = 0.55; u.pitch = 1.0;
-    const saved = getSavedVoiceName();
-    if (saved) { const v = window.speechSynthesis.getVoices().find(vo => vo.name === saved); if (v) u.voice = v; }
-    if (!u.voice) {
-      // Fallback: pick best French voice
-      const voices = window.speechSynthesis.getVoices();
-      const preferred = ['Google français', 'Thomas', 'Amélie', 'Microsoft Hortense'];
-      for (const name of preferred) {
-        const v = voices.find(vo => vo.name.includes(name) && vo.lang.startsWith('fr'));
-        if (v) { u.voice = v; break; }
-      }
-      if (!u.voice) { const v = voices.find(vo => vo.lang.startsWith('fr')); if (v) u.voice = v; }
-    }
-    u.onend = () => { idx++; setTimeout(speakNext, 250); };
+    u.voice = savedVoice || voice || u.voice;
+    u.onend = () => { idx++; setTimeout(speakNext, 150); }; // 250→150ms pause
     window.speechSynthesis.speak(u);
   };
   speakNext();
@@ -86,12 +81,14 @@ export function getSavedVoiceName(): string | null {
 
 export function saveVoiceName(name: string): void {
   localStorage.setItem('ff_voice', name);
+  cachedFrenchVoice = null; // invalidate cache so new voice is picked up
 }
 
 export function useTTS() {
   const [state, setState] = useState<TTSState>({
     isSpeaking: false, isPaused: false, currentText: null, error: null,
   });
+  const keepAliveRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const speak = useCallback((text: string, options?: { rate?: number; lang?: string; onEnd?: () => void }) => {
     if (!('speechSynthesis' in window)) {
@@ -99,60 +96,50 @@ export function useTTS() {
       return;
     }
 
-    window.speechSynthesis.cancel();
+    // Only cancel if something is actually speaking (cancel() can be slow)
+    if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+      window.speechSynthesis.cancel();
+    }
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = options?.lang || 'fr-FR';
-    utterance.rate = options?.rate || 0.9;
+    utterance.rate = options?.rate ?? 0.9;
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
 
-    // Ensure voices are loaded (on some browsers getVoices() is empty on first call)
-    let voices = window.speechSynthesis.getVoices();
-    if (voices.length === 0) {
-      // Force a reload — on some browsers this triggers onvoiceschanged
-      const dummy = new SpeechSynthesisUtterance('');
-      dummy.volume = 0;
-      window.speechSynthesis.speak(dummy);
-      voices = window.speechSynthesis.getVoices();
-    }
-
-    // Try to use saved/best French voice
-    if (voices.length > 0) {
-      const savedVoice = getSavedVoiceName();
-      if (savedVoice) {
-        const voice = voices.find(v => v.name === savedVoice);
-        if (voice) utterance.voice = voice;
-      }
-      if (!utterance.voice) {
-        const best = getBestFrenchVoice();
-        if (best) utterance.voice = best;
+    // Use cached voice (fast path)
+    const voice = getCachedFrenchVoice();
+    if (voice) {
+      const saved = getSavedVoiceName();
+      if (saved && saved !== voice.name) {
+        const sv = window.speechSynthesis.getVoices().find(v => v.name === saved);
+        utterance.voice = sv || voice;
+      } else {
+        utterance.voice = voice;
       }
     }
-
-    let keepAliveInterval: ReturnType<typeof setInterval> | null = null;
 
     utterance.onstart = () => {
       setState({ isSpeaking: true, isPaused: false, currentText: text, error: null });
       // Chrome bug: speech stops after ~15s. Keep-alive prevents this.
-      keepAliveInterval = setInterval(() => {
+      if (keepAliveRef.current) clearInterval(keepAliveRef.current);
+      keepAliveRef.current = setInterval(() => {
         if (window.speechSynthesis.speaking) {
           window.speechSynthesis.pause();
           window.speechSynthesis.resume();
         }
-      }, 8000);
+      }, 10000); // 8s→10s, even less aggressive
     };
 
     utterance.onend = () => {
-      if (keepAliveInterval) clearInterval(keepAliveInterval);
+      if (keepAliveRef.current) { clearInterval(keepAliveRef.current); keepAliveRef.current = null; }
       setState({ isSpeaking: false, isPaused: false, currentText: null, error: null });
       options?.onEnd?.();
     };
 
     utterance.onerror = (event) => {
-      if (keepAliveInterval) clearInterval(keepAliveInterval);
-      // 'canceled' is normal when we call cancel() ourselves
-      if (event.error !== 'canceled') {
+      if (keepAliveRef.current) { clearInterval(keepAliveRef.current); keepAliveRef.current = null; }
+      if (event.error !== 'canceled' && event.error !== 'interrupted') {
         console.warn('FrenchFlow TTS error:', event.error);
         setState(s => ({ ...s, isSpeaking: false, error: `语音播放失败: ${event.error}` }));
       }
@@ -162,6 +149,7 @@ export function useTTS() {
   }, []);
 
   const cancel = useCallback(() => {
+    if (keepAliveRef.current) { clearInterval(keepAliveRef.current); keepAliveRef.current = null; }
     window.speechSynthesis.cancel();
     setState({ isSpeaking: false, isPaused: false, currentText: null, error: null });
   }, []);
@@ -175,21 +163,20 @@ export function useTTS() {
 // Pre-load voices (call once on app start)
 export function initVoices(): void {
   if (!('speechSynthesis' in window)) return;
-  // Trigger voice loading — getVoices() is async on most browsers
+
   const voices = window.speechSynthesis.getVoices();
-  // If already loaded on this browser, we're done
   if (voices.length > 0) {
-    console.log('FrenchFlow TTS: voices loaded', voices.filter(v => v.lang.startsWith('fr')).length, 'French voices');
+    getCachedFrenchVoice(); // warm cache
     return;
   }
-  // Otherwise wait for onvoiceschanged
+
+  // Async voice loading
   window.speechSynthesis.onvoiceschanged = () => {
-    const v = window.speechSynthesis.getVoices();
-    console.log('FrenchFlow TTS: voices loaded (async)', v.filter(vo => vo.lang.startsWith('fr')).length, 'French voices');
+    getCachedFrenchVoice(); // refresh cache when voices arrive
   };
-  // Also force-load with a dummy utterance (workaround for some browsers)
+
+  // Force-load with a silent dummy utterance (workaround for some browsers)
   const dummy = new SpeechSynthesisUtterance('');
   dummy.volume = 0;
-  dummy.rate = 2;
   window.speechSynthesis.speak(dummy);
 }
