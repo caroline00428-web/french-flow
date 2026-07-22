@@ -29,15 +29,26 @@ export default function Dialogue() {
     setTotal(t => t + 1);
     if (choice.isBest) setScore(s => s + 1);
     setFeedback(choice.feedback);
-    // Auto-advance after feedback
     setTimeout(() => {
       setFeedback(null);
-      if (choice.nextNode >= scenario.nodes.length - 1) {
+      const next = choice.nextNode;
+      if (next >= scenario.nodes.length) {
         setDone(true);
       } else {
-        setNodeIdx(choice.nextNode);
+        setNodeIdx(next);
       }
-    }, 2000);
+    }, 1800);
+  };
+
+  // Advance nodes without choices (narrator text, single-line dialogue)
+  const handleContinue = () => {
+    if (!scenario) return;
+    const next = nodeIdx + 1;
+    if (next >= scenario.nodes.length) {
+      setDone(true);
+    } else {
+      setNodeIdx(next);
+    }
   };
 
   const handleBack = () => {
@@ -164,20 +175,31 @@ export default function Dialogue() {
               </div>
             )}
 
-            {/* Choices */}
-            {node.choices && !feedback && (
-              <div className="space-y-2 mt-4 pt-3 border-t border-gray-100">
-                <p className="text-xs text-gray-400 mb-1">你的选择：</p>
-                {node.choices.map((c, i) => (
+            {/* Choices or Continue button */}
+            {!feedback && (
+              node.choices ? (
+                <div className="space-y-2 mt-4 pt-3 border-t border-gray-100">
+                  <p className="text-xs text-gray-400 mb-1">你的选择：</p>
+                  {node.choices.map((c, i) => (
+                    <button
+                      key={i}
+                      onClick={() => handleChoice(c)}
+                      className="w-full p-3 rounded-xl border-2 border-gray-200 text-left text-sm hover:border-purple-300 hover:bg-purple-50 transition-all active:scale-[0.98]"
+                    >
+                      {c.text}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="mt-4 pt-3 border-t border-gray-100">
                   <button
-                    key={i}
-                    onClick={() => handleChoice(c)}
-                    className="w-full p-3 rounded-xl border-2 border-gray-200 text-left text-sm hover:border-purple-300 hover:bg-purple-50 transition-all active:scale-[0.98]"
+                    onClick={handleContinue}
+                    className="w-full py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 transition-colors flex items-center justify-center gap-1"
                   >
-                    {c.text}
+                    继续 <ChevronRight size={14} />
                   </button>
-                ))}
-              </div>
+                </div>
+              )
             )}
 
             {/* Feedback */}

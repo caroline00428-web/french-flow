@@ -22,8 +22,9 @@ const courses: CourseSection[] = [
     subtitle: '和AI同学Chloé比拼法语知识',
     icon: '⚔️',
     lessons: [
-      { name: '对战 Chloé', desc: '10题PK · 纠正她额外加分', to: '/quiz-battle' },
+      { name: '对战 Chloé', desc: 'DELF真题PK · 纠错加分', to: '/quiz-battle' },
       { name: '情景对话', desc: '咖啡馆·火车站·餐厅·面试', to: '/dialogue' },
+      { name: '法语百问', desc: '语法·发音·文化深度问答', to: '/faq' },
     ],
   },
   {
