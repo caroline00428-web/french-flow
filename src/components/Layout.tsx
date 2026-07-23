@@ -34,11 +34,6 @@ export default function Layout() {
       {/* AI Tutor floating button */}
       <TutorFab />
 
-      {/* Feedback floating button */}
-      <NavLink to="/feedback" className="fixed bottom-24 right-4 z-40 w-10 h-10 bg-white border border-gray-200 text-gray-400 rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all text-lg">
-        💬
-      </NavLink>
-
       {/* Bottom navigation — 4 tabs */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-gray-100">
         <div className="max-w-lg mx-auto flex items-center justify-around px-2 py-1.5">

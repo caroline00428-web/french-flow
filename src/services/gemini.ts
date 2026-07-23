@@ -2,23 +2,37 @@
 // AI Tutor Service — 智谱AI GLM-4-Flash (国内免费直连) + Gemini 备用
 // ============================================================
 
+import { getActiveProfile, saveChatMessage, getChatHistory, updateProfile } from './accountService';
+
 interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
 }
 
-// Get API key from localStorage
+// Get API key from active profile
 function getApiKey(): string | null {
   try {
-    return localStorage.getItem('frenchflow_api_key');
+    const p = getActiveProfile();
+    return p?.apiKey || null;
   } catch { return null; }
 }
 
 function getApiProvider(): 'zhipu' | 'gemini' {
-  return (localStorage.getItem('frenchflow_api_provider') as 'zhipu' | 'gemini') || 'zhipu';
+  try {
+    const p = getActiveProfile();
+    return p?.apiProvider || 'zhipu';
+  } catch { return 'zhipu'; }
 }
 
 export function setApiKey(key: string, provider: 'zhipu' | 'gemini' = 'zhipu'): void {
+  // Sync to active profile
+  try {
+    const p = getActiveProfile();
+    if (p) {
+      updateProfile(p.id, { apiKey: key.trim(), apiProvider: provider });
+    }
+  } catch {}
+  // Legacy sync
   localStorage.setItem('frenchflow_api_key', key.trim());
   localStorage.setItem('frenchflow_api_provider', provider);
 }
@@ -162,7 +176,7 @@ async function askGemini(
 }
 
 // ============================================================
-// Main askTutor function — auto-selects provider
+// Main askTutor function — auto-selects provider + saves history
 // ============================================================
 export async function askTutor(
   question: string,
@@ -173,13 +187,35 @@ export async function askTutor(
   if (!apiKey) throw new Error('NO_API_KEY');
 
   const provider = getApiProvider();
-  if (provider === 'gemini') {
-    return askGemini(question, history, context);
+
+  // Save user message
+  const profile = getActiveProfile();
+  if (profile) {
+    saveChatMessage(profile.id, 'user', question, context?.currentPage || '');
   }
-  return askZhipu(question, history, context);
+
+  let reply: string;
+  if (provider === 'gemini') {
+    reply = await askGemini(question, history, context);
+  } else {
+    reply = await askZhipu(question, history, context);
+  }
+
+  // Save assistant reply
+  if (profile) {
+    saveChatMessage(profile.id, 'assistant', reply, context?.currentPage || '');
+  }
+
+  return reply;
 }
 
-// ============================================================
+// Load chat history for current profile (returns format compatible with UI)
+export async function loadChatHistory(): Promise<{ id: string; role: string; content: string }[]> {
+  const profile = getActiveProfile();
+  if (!profile) return [];
+  const history = await getChatHistory(profile.id, 50);
+  return history.map(m => ({ id: m.id, role: m.role, content: m.content }));
+}
 // Test API key
 // ============================================================
 export async function testApiKey(key: string, provider: 'zhipu' | 'gemini' = 'zhipu'): Promise<boolean> {

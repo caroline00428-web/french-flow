@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useGameStore } from './store/useGameStore';
 import { initVoices } from './hooks/useTTS';
+import { migrateFromLegacy } from './services/accountService';
 import Layout from './components/Layout';
 
 // Core 4 tabs
@@ -35,7 +36,7 @@ export default function App() {
   const initialize = useGameStore(s => s.initialize);
   const isLoaded = useGameStore(s => s.isLoaded);
 
-  useEffect(() => { initialize(); initVoices(); }, [initialize]);
+  useEffect(() => { initialize(); initVoices(); migrateFromLegacy(); }, [initialize]);
 
   if (!isLoaded) {
     return (

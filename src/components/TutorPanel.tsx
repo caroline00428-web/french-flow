@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { askTutor, type TutorContext } from '../services/gemini';
+import { askTutor, loadChatHistory, type TutorContext } from '../services/gemini';
 import { Send, User, X, AlertCircle } from 'lucide-react';
 
 // Quick questions based on page context
@@ -66,11 +66,17 @@ export default function TutorPanel({ isOpen, onClose }: Props) {
 
   const context: TutorContext = { currentPage: pageName };
 
-  // Reset when opening
+  // Load chat history when opening
   useEffect(() => {
     if (isOpen) {
       setError(null);
       setInput('');
+      // Load saved chat history from IndexedDB
+      loadChatHistory().then(history => {
+        if (history.length > 0) {
+          setMessages(history.map(m => ({ id: m.id || Date.now().toString(), role: m.role as 'user' | 'assistant', content: m.content })));
+        }
+      }).catch(() => {});
     }
   }, [isOpen]);
 
